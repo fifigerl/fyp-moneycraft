@@ -1,0 +1,84 @@
+/* Basic reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-container {
+    text-align: center;
+    padding: 2rem;
+    background-color: #fefef1;
+    border-radius: 20px;
+    width: 320px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.logo img {
+    width: 200px; /* Set the width to your desired size */
+    height: auto; /* This maintains the aspect ratio */
+}
+h2 {
+    margin: 1.5rem 0;
+    font-size: large;
+    color: #3e1968;
+    font-family: 'Poppins', sans-serif;
+}
+
+.login-form .input-group {
+    margin: 1rem 0;
+    text-align: left;
+}
+
+.input-group label {
+    font-size: 0.9rem;
+    color: #283618;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.login-btn {
+    background-color: #f5b400;
+    color: #fff;
+    border: 2px solid rgb(222, 202, 130) ;
+    padding: 0.75rem 1rem;
+    margin-top: 1rem;
+    border-radius: 5px;
+    width: 100%;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.login-btn:hover {
+    background-color: #e0a600;
+}
+
+.signup-text {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+.signup-text a {
+    color: #f5b400;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.signup-text a:hover {
+    text-decoration: underline;
+}
