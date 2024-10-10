@@ -64,7 +64,24 @@ h2 {
     font-weight: bold;
 }
 
+.signup-btn {
+        background-color: #f5b400;
+        color: #fff;
+        border: 2px solid rgb(222, 202, 130) ;
+        padding: 0.75rem 1rem;
+        margin-top: 1rem;
+        border-radius: 5px;
+        width: 100%;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+
 .login-btn:hover {
+    background-color: #e0a600;
+}
+
+.signup-btn:hover {
     background-color: #e0a600;
 }
 
@@ -79,6 +96,25 @@ h2 {
     font-weight: bold;
 }
 
+
+
 .signup-text a:hover {
+    text-decoration: underline;
+}
+
+.login-text {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+.login-text a {
+    color: #f5b400;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+
+
+.login-text a:hover {
     text-decoration: underline;
 }
