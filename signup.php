@@ -15,13 +15,10 @@
         <h2>Create a new account.</h2>
         <form action="#" method="POST" class="login-form">
             <div class="input-group">
-                <label for="first-name">First Name</label>
+                <label for="username">Username</label>
                 <input type="text" id="first-name" name="first-name" required>
             </div>
-            <div class="input-group">
-                <label for="last-name">Last Name</label>
-                <input type="text" id="last-name" name="last-name" required>
-            </div>
+           
             <div class="input-group">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" required>
