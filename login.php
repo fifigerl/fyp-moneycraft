@@ -1,5 +1,85 @@
 <?php
-    include("config.php");
+// Start the session
+session_start();
+
+// Include config file
+require_once 'config.php';
+
+// Define variables and initialize with empty values
+$username = $password = "";
+$username_err = $password_err = "";
+$login_err = "";
+
+// Processing form data when form is submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Check if username is empty
+    if (empty(trim($_POST["username"]))) {
+        $username_err = "Please enter username.";
+    } else {
+        $username = trim($_POST["username"]);
+    }
+
+    // Check if password is empty
+    if (empty(trim($_POST["password"]))) {
+        $password_err = "Please enter your password.";
+    } else {
+        $password = trim($_POST["password"]);
+    }
+
+    // Validate credentials
+    if (empty($username_err) && empty($password_err)) {
+        // Prepare a select statement
+        $sql = "SELECT UserID, Username, UserPwd FROM users WHERE Username = ?";
+
+        if ($stmt = $conn->prepare($sql)) {
+            // Bind variables to the prepared statement as parameters
+            $stmt->bind_param("s", $param_username);
+            
+            // Set parameters
+            $param_username = $username;
+            
+            // Attempt to execute the prepared statement
+            if ($stmt->execute()) {
+                // Store result
+                $stmt->store_result();
+                
+                // Check if username exists, if yes then verify password
+                if ($stmt->num_rows == 1) {
+                    // Bind result variables
+                    $stmt->bind_result($id, $username, $hashed_password);
+                    if ($stmt->fetch()) {
+                        if (password_verify($password, $hashed_password)) {
+                            // Password is correct, so start a new session
+                            session_start();
+                            
+                            // Store data in session variables
+                            $_SESSION["loggedin"] = true;
+                            $_SESSION["id"] = $id;
+                            $_SESSION["username"] = $username;                            
+                            
+                            // Redirect user to index page
+                            header("location: index.php");
+                        } else {
+                            // Password is not valid, display a generic error message
+                            $login_err = "Invalid username or password.";
+                        }
+                    }
+                } else {
+                    // Username doesn't exist, display a generic error message
+                    $login_err = "Invalid username or password.";
+                }
+            } else {
+                echo "Oops! Something went wrong. Please try again later.";
+            }
+
+            // Close statement
+            $stmt->close();
+        }
+    }
+
+    // Close connection
+    $conn->close();
+}
 ?>
 
 <!DOCTYPE html>
@@ -10,7 +90,6 @@
     <title>MoneyCraft Login</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-
 </head>
 <body>
     <div class="login-container">
@@ -18,19 +97,27 @@
             <img src="logo.jpg" alt="logo">
         </div>
         <h2>Login to your Account</h2>
-        <form action="#" method="POST" class="login-form">
+        
+        <?php 
+        if (!empty($login_err)) {
+            echo '<div class="error-message">' . $login_err . '</div>';
+        }        
+        ?>
+
+        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST" class="login-form">
             <div class="input-group">
                 <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
+                <input type="text" id="username" name="username" value="<?php echo $username; ?>" required>
+                <span class="error"><?php echo $username_err; ?></span>
             </div>
             <div class="input-group">
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" required>
+                <span class="error"><?php echo $password_err; ?></span>
             </div>
             <button type="submit" class="login-btn">Log In</button>
         </form>
         <p class="signup-text">Don’t Have An Account? <a href="signup.php">Sign Up</a></p>
-
     </div>
 </body>
 </html>
