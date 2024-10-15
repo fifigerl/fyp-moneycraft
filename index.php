@@ -1,4 +1,15 @@
-<!DOCTYPE html>
+<?php
+// Initialize the session
+session_start();
+
+// Check if the user is logged in, if not then redirect them to login page
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+    header("location: login.php");
+    exit;
+}
+?>
+
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -83,15 +94,10 @@
 
 <header>
     <div>
-        <img src="moneycraft-logo.png" alt="MoneyCraft Logo">
+    <?php include('navbar.php'); ?>
     </div>
-    <nav>
-        <a href="#">Home</a>
-        <a href="#">Financial Activity</a>
-        <a href="#">Learning Center</a>
-        <a href="#">Account</a>
-    </nav>
 </header>
+
 
 <section class="dashboard">
     <div class="left-section">

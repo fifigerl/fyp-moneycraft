@@ -115,3 +115,140 @@ h2 {
 .login-text a:hover {
     text-decoration: underline;
 }
+
+/*Navbar css
+
+/* Resetting some basic styles */
+body, ul, li, a {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+/* Navbar styles */
+.navbar {
+    background-color: #FFF7DD;
+    padding: 15px 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Logo styling */
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #F29400;
+    display: flex;
+    align-items: center;
+    margin-right: 40px; /* Added margin to create space between logo and nav links */
+}
+
+/* Navigation links */
+.nav-links {
+    display: flex;
+    align-items: center;
+}
+
+.nav-links li {
+    margin-left: 20px; /* Adds space between the navigation items */
+}
+
+/* Dropdown styles */
+.nav-links a {
+    color: #333;
+    padding: 10px 15px;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.nav-links a:hover {
+    color: #F29400;
+}
+
+/* Dropdown button */
+.dropdown .dropbtn {
+    cursor: pointer;
+}
+
+/* Dropdown menu content */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+    z-index: 1;
+}
+
+.dropdown-content a {
+    padding: 10px 20px;
+    display: block;
+    color: #333;
+    font-size: 15px;
+    font-weight: 500;
+    background-color: #FFF7DD;
+    border-bottom: 1px solid #EAEAEA;
+}
+
+.dropdown-content a:hover {
+    background-color: #FFD580;
+    color: #F29400;
+}
+
+/* Show dropdown menu when hovering */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Main content styling */
+.main-content {
+    padding: 100px 20px; /* Adjusting padding to account for fixed navbar */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .nav-links {
+        flex-direction: column;
+        background-color: #FFF7DD;
+        position: absolute;
+        top: 60px;
+        right: 0;
+        width: 200px;
+        display: none;
+        border-left: 1px solid #EAEAEA;
+    }
+
+    .nav-links li {
+        width: 100%;
+    }
+
+    .navbar .container {
+        flex-direction: column;
+    }
+
+    .dropdown-content {
+        position: static;
+    }
+
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+
+    .nav-links.show {
+        display: flex;
+    }
+}

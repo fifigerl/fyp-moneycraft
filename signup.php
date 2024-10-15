@@ -10,7 +10,7 @@
 <body>
     <div class="login-container">
         <div class="logo">
-            <img src="logo.jpg" alt="MoneyCraft logo">
+            <img src="images/logo.jpg" alt="MoneyCraft logo">
         </div>
         <h2>Create a new account.</h2>
         

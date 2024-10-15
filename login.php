@@ -94,7 +94,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
     <div class="login-container">
         <div class="logo">
-            <img src="logo.jpg" alt="logo">
+            <img src="images/logo.jpg" alt="logo">
         </div>
         <h2>Login to your Account</h2>
         
