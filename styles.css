@@ -252,3 +252,380 @@ body, ul, li, a {
         display: flex;
     }
 }
+
+/* index css */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+.dashboard-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.left-panel, .right-panel {
+    width: 45%;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Savings Goals Section */
+.savings-goals {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.savings-goals h2 {
+    font-size: 36px;
+    color: #ffcc00;
+}
+
+.savings-goals p {
+    font-size: 18px;
+    color: #888;
+}
+
+/* Bills Section */
+.bills {
+    margin-bottom: 20px;
+}
+
+.bills h3 {
+    font-size: 18px;
+    margin: 0;
+}
+
+.bills p {
+    font-size: 24px;
+    color: #333;
+}
+
+/* Food Expenses Section */
+.food-expenses h3 {
+    font-size: 18px;
+    margin: 0;
+}
+
+.food-expenses p {
+    font-size: 24px;
+    color: #f00;
+}
+
+/* Video Section */
+.video-section h2 {
+    font-size: 24px;
+    color: #5a2ba0;
+}
+
+.video {
+    margin: 10px 0;
+}
+
+.video p {
+    color: #555;
+    font-size: 14px;
+}
+
+/* Transaction History */
+.transaction-history {
+    margin: 30px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.transaction-history h3 {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+.filter {
+    margin-bottom: 20px;
+}
+
+.filter button {
+    margin-right: 10px;
+    padding: 10px;
+    background-color: #ffcc00;
+    border: none;
+    border-radius: 5px;
+    color: #333;
+    cursor: pointer;
+}
+
+.transaction-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.transaction-item img {
+    width: 24px;
+    margin-right: 10px;
+}
+
+.transaction-item p {
+    flex: 1;
+    margin: 0;
+}
+
+.transaction-item .amount {
+    font-weight: bold;
+}
+
+.transaction-item:last-child {
+    border-bottom: none;
+}
+
+/* NAVBAR STYLES */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Navbar container */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    padding: 15px 30px;
+    font-family: 'Arial', sans-serif;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* Logo and brand name styling */
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    width: 40px;
+    margin-right: 10px;
+}
+
+.brand-name {
+    color: #f79256;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+/* Navbar links */
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    font-size: 16px;
+    color: #1b1b1b;
+    font-weight: 500;
+}
+
+/* Active link styling */
+.nav-links .active {
+    color: #ffcc00;
+}
+
+/* Dropdown menu */
+.dropdown {
+    position: relative;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+}
+
+.dropdown-content a {
+    padding: 10px 15px;
+    display: block;
+    color: #1b1b1b;
+    text-decoration: none;
+}
+
+.dropdown-content a:hover {
+    background-color: #f0f0f0;
+}
+
+/* Show dropdown on hover */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Account and other links alignment */
+.nav-links a {
+    transition: color 0.3s;
+}
+
+.nav-links a:hover {
+    color: #0077b6;
+}
+
+/* Mobile-friendly styling */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #fafafa;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+h1, h2, h3 {
+    text-align: center;
+    color: #4A148C;
+}
+
+.summary {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.card {
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    background-color: #FFCC80;
+    color: #4A148C;
+    font-size: 18px;
+}
+
+.transaction-history table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.transaction-history th, td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+.transaction-history th {
+    background-color: #4A148C;
+    color: white;
+}
+
+.form-container {
+    margin-top: 20px;
+}
+
+form input, form select {
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+    padding: 8px;
+}
+
+button {
+    background-color: #4A148C;
+    color: white;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+}
+
+/* Transactions.php styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: auto;
+}
+
+header h1 {
+    text-align: center;
+    color: #4B0082;
+}
+
+.balance-container {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+}
+
+.balance {
+    text-align: center;
+    background-color: #ffd700;
+    padding: 10px;
+    border-radius: 8px;
+    width: 30%;
+}
+
+.transaction-history {
+    margin-top: 30px;
+}
+
+#add-transaction {
+    background-color: #4B0082;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: 10px;
+    width: 50%;
+}
+
+.close {
+    float: right;
+    cursor: pointer;
+    font-size: 20px;
+}
