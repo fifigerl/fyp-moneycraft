@@ -4,11 +4,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeModal = document.querySelector('.close');
     const addTransactionBtn = document.getElementById('add-transaction');
     const transactionForm = document.getElementById('transaction-form');
+    let submitted = false; // Flag to prevent multiple submissions
 
     // Fetch transactions when the page loads
     async function fetchTransactions() {
         try {
-            const response = await fetch('tran_process.php?action=fetch');
+            const response = await fetch('tran_process.php', {
+                method: 'GET'
+            });
             const data = await response.json();
             renderTransactions(data);
         } catch (error) {
@@ -29,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tranDiv.innerHTML = `
                 <p>${tran.TranTitle} - ${tran.TranType} - RM${parseFloat(tran.TranAmount).toFixed(2)} - ${tran.TranDate}</p>
                 <button onclick="deleteTransaction(${tran.TranID})">Delete</button>
+                <button onclick='editTransaction(${JSON.stringify(tran)})'>Edit</button>
             `;
             transactionsList.appendChild(tranDiv);
 
@@ -43,6 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Show the transaction modal
     addTransactionBtn.addEventListener('click', () => {
+        transactionForm.reset(); // Reset form for new transaction
+        document.getElementById('tran_id').value = ''; // Clear transaction ID
         transactionModal.style.display = 'block';
     });
 
@@ -51,15 +57,15 @@ document.addEventListener('DOMContentLoaded', () => {
         transactionModal.style.display = 'none';
     });
 
-    // Handle form submission to add a new transaction
+    // Handle form submission to add or edit a transaction
     transactionForm.addEventListener('submit', async (e) => {
-        e.preventDefault(); // Prevent form reload immediately
+        e.preventDefault();
 
-        // Disable submit button to prevent multiple submissions
-        const submitButton = transactionForm.querySelector('button[type="submit"]');
-        submitButton.disabled = true;
+        if (submitted) return;
+        submitted = true;
 
         const formData = new FormData(transactionForm);
+        formData.append("action", "save"); // Ensure action is specified for save
 
         try {
             const response = await fetch('tran_process.php', {
@@ -67,34 +73,105 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: formData
             });
             const data = await response.json();
-
             alert(data.success || data.error);
-            transactionModal.style.display = 'none';
-            transactionForm.reset();
-            fetchTransactions(); // Refresh the transaction list
+            if (data.success) {
+                transactionModal.style.display = 'none';
+                transactionForm.reset();
+                fetchTransactions();
+            }
         } catch (error) {
             console.error("Error submitting transaction:", error);
         } finally {
-            // Re-enable the submit button after the request completes
-            submitButton.disabled = false;
+            submitted = false;
         }
     });
 
-    // Function to delete a transaction
+    // Delete a transaction
     window.deleteTransaction = async (tranID) => {
         if (confirm('Are you sure you want to delete this transaction?')) {
-            try {
-                const response = await fetch(`tran_process.php?action=delete&TranID=${tranID}`);
-                const data = await response.json();
+            const formData = new FormData();
+            formData.append('action', 'delete');
+            formData.append('tran_id', tranID);
 
+            try {
+                const response = await fetch('tran_process.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
                 alert(data.success || data.error);
-                fetchTransactions(); // Refresh the transaction list
+                fetchTransactions();
             } catch (error) {
                 console.error("Error deleting transaction:", error);
             }
         }
     };
 
-    // Initial fetch of transactions
+    // Edit transaction
+    window.editTransaction = (tran) => {
+        document.getElementById('tran_id').value = tran.TranID;
+        document.getElementById('tran_title').value = tran.TranTitle;
+        document.getElementById('tran_type').value = tran.TranType;
+        document.getElementById('tran_category').value = tran.TranCat;
+        document.getElementById('tran_amount').value = tran.TranAmount;
+        document.getElementById('tran_date').value = tran.TranDate;
+        transactionModal.style.display = 'block';
+    };
+
+    // Fetch categories when the page loads
+    async function fetchCategories() {
+        try {
+            const response = await fetch('category_process.php', {
+                method: 'GET'
+            });
+            const data = await response.json();
+            renderCategories(data);
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+        }
+    }
+
+    // Render categories in the dropdown and list
+    function renderCategories(categories) {
+        const categorySelect = document.getElementById('tran_category');
+        const categoryList = document.getElementById('category-list');
+        categorySelect.innerHTML = '';
+        categoryList.innerHTML = '';
+
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.name;
+            option.textContent = category.name;
+            categorySelect.appendChild(option);
+
+            const categoryDiv = document.createElement('div');
+            categoryDiv.textContent = category.name;
+            categoryList.appendChild(categoryDiv);
+        });
+    }
+
+    // Handle form submission to add a new category
+    document.getElementById('category-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const newCategory = document.getElementById('new_category').value;
+
+        try {
+            const response = await fetch('category_process.php', {
+                method: 'POST',
+                body: JSON.stringify({ action: 'add', name: newCategory }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await response.json();
+            alert(data.success || data.error);
+            if (data.success) {
+                fetchCategories();
+            }
+        } catch (error) {
+            console.error("Error adding category:", error);
+        }
+    });
+
+    // Initial fetch of transactions and categories
     fetchTransactions();
+    fetchCategories();
 });

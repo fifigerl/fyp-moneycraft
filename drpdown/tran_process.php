@@ -1,73 +1,53 @@
 <?php
-include '../config.php'; // Include the MySQLi connection
-
-$userId = 1; // Example UserID (replace with session logic if needed)
+include '../config.php';
+$userId = 1;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
     if ($action === 'save') {
         $title = $_POST['title'];
+        $category = $_POST['category'];
         $type = $_POST['type'];
         $amount = $_POST['amount'];
         $date = $_POST['date'];
+        $tranId = $_POST['tran_id'] ?? null;
 
-        $sql = "INSERT INTO transactions (UserID, TranType, TranTitle, TranAmount, TranDate) VALUES (?, ?, ?, ?, ?)";
-        $stmt = $conn->prepare($sql);
-
-        if ($stmt) {
-            $stmt->bind_param("issds", $userId, $type, $title, $amount, $date);
-            if ($stmt->execute()) {
-                echo json_encode(["success" => "Transaction saved successfully!"]);
-            } else {
-                echo json_encode(["error" => "Failed to save transaction: " . $stmt->error]);
-            }
-            $stmt->close();
+        if ($tranId) {
+            $sql = "UPDATE Transactions SET TranTitle=?, TranCat=?, TranType=?, TranAmount=?, TranDate=? WHERE TranID=? AND UserID=?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("sssdsii", $title, $category, $type, $amount, $date, $tranId, $userId);
         } else {
-            echo json_encode(["error" => "Failed to prepare SQL query."]);
+            $sql = "INSERT INTO Transactions (UserID, TranType, TranTitle, TranCat, TranAmount, TranDate) VALUES (?, ?, ?, ?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("isssds", $userId, $type, $title, $category, $amount, $date);
         }
-        exit();
-    }
-} elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $action = $_GET['action'] ?? '';
-
-    if ($action === 'fetch') {
-        $sql = "SELECT * FROM transactions WHERE UserID = ? ORDER BY TranDate DESC";
-        $stmt = $conn->prepare($sql);
-
-        if ($stmt) {
-            $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        echo json_encode(["success" => "Transaction saved successfully!"]);
+        $stmt->close();
+    } elseif ($action === 'delete') {
+        $tranId = $_POST['tran_id'] ?? null;
+        if ($tranId) {
+            $sql = "DELETE FROM Transactions WHERE TranID = ? AND UserID = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("ii", $tranId, $userId);
             $stmt->execute();
-            $result = $stmt->get_result();
-
-            $transactions = $result->fetch_all(MYSQLI_ASSOC);
-            header('Content-Type: application/json');
-            echo json_encode($transactions);
+            echo json_encode(["success" => "Transaction deleted successfully!"]);
             $stmt->close();
         } else {
-            echo json_encode(['error' => 'Failed to prepare SQL query.']);
+            echo json_encode(["error" => "Invalid transaction ID"]);
         }
-        exit();
     }
-
-    if ($action === 'delete' && isset($_GET['TranID'])) {
-        $tranID = $_GET['TranID'];
-
-        $sql = "DELETE FROM transactions WHERE TranID = ?";
-        $stmt = $conn->prepare($sql);
-
-        if ($stmt) {
-            $stmt->bind_param("i", $tranID);
-            if ($stmt->execute()) {
-                echo json_encode(["success" => "Transaction deleted successfully!"]);
-            } else {
-                echo json_encode(["error" => "Failed to delete transaction: " . $stmt->error]);
-            }
-            $stmt->close();
-        } else {
-            echo json_encode(["error" => "Failed to prepare SQL query."]);
-        }
-        exit();
-    }
+    exit();
+} elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $sql = "SELECT * FROM Transactions WHERE UserID = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $transactions = $result->fetch_all(MYSQLI_ASSOC);
+    echo json_encode($transactions);
+    $stmt->close();
+    exit();
 }
 ?>

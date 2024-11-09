@@ -1,5 +1,4 @@
 <?php
-
 $servername = "localhost";
 $dbname = "moneycraft"; 
 $username = "root"; 
