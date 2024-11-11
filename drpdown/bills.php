@@ -1,0 +1,142 @@
+<?php include '../config.php'; ?>
+<?php include '../navbar.php'; ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Bills</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>My Bills</h1>
+        <button id="add-bill-btn">+ Add Bill</button>
+        <div id="bills-list"></div>
+    </div>
+
+    <div id="bill-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form id="bill-form">
+                <input type="hidden" name="action" value="create">
+                <input type="hidden" name="reminder_id" id="reminder_id">
+                <input type="text" name="title" id="bill-title" placeholder="Bill Title" required>
+                <input type="date" name="due" id="bill-due" required>
+                <select name="frequency" id="bill-frequency" required>
+                    <option value="Monthly">Monthly</option>
+                    <option value="Quarterly">Quarterly</option>
+                    <option value="Yearly">Yearly</option>
+                </select>
+                <input type="number" name="amount" id="bill-amount" placeholder="Amount" required>
+                <button type="submit">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const billsList = document.getElementById('bills-list');
+            const billModal = document.getElementById('bill-modal');
+            const closeModal = document.querySelector('.close');
+            const addBillBtn = document.getElementById('add-bill-btn');
+            const billForm = document.getElementById('bill-form');
+            let bills = [];
+
+            addBillBtn.onclick = () => {
+                billForm.reset();
+                billForm.action.value = 'create';
+                billModal.style.display = 'block';
+            };
+
+            closeModal.onclick = () => {
+                billModal.style.display = 'none';
+            };
+
+            billForm.onsubmit = async (e) => {
+                e.preventDefault();
+                const formData = new FormData(billForm);
+                formData.append('user_id', 1); // Replace with dynamic user ID
+
+                const response = await fetch('bills_process.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                alert(data.success || data.error);
+                fetchBills();
+                billModal.style.display = 'none';
+            };
+
+            async function fetchBills() {
+                const response = await fetch('bills_process.php', {
+                    method: 'POST',
+                    body: new URLSearchParams({ action: 'read', user_id: 1 }) // Replace with dynamic user ID
+                });
+                bills = await response.json();
+                renderBills(bills);
+            }
+
+            function renderBills(bills) {
+                billsList.innerHTML = '';
+                const today = new Date();
+                bills.forEach(bill => {
+                    const billDueDate = new Date(bill.BillDue);
+                    const isOverdue = billDueDate < today;
+                    const billItem = document.createElement('div');
+                    billItem.className = 'bill-item';
+                    billItem.innerHTML = `
+                        <h4>${bill.BillTitle}</h4>
+                        <p>Amount: RM${bill.BillAmt}</p>
+                        <p>Due: ${bill.BillDue} ${isOverdue ? '<span style="color: red;">(Overdue)</span>' : ''}</p>
+                        <p>Frequency: ${bill.BillFrequency}</p>
+                        <input type="checkbox" ${bill.Paid ? 'checked' : ''} onclick="togglePaid(${bill.ReminderID})"> Paid
+                        <button onclick="editBill(${bill.ReminderID})">Edit</button>
+                        <button onclick="deleteBill(${bill.ReminderID})">Delete</button>
+                    `;
+                    billsList.appendChild(billItem);
+                });
+            }
+
+            window.editBill = (id) => {
+                const bill = bills.find(b => b.ReminderID === id);
+                if (bill) {
+                    document.getElementById('reminder_id').value = bill.ReminderID;
+                    document.getElementById('bill-title').value = bill.BillTitle;
+                    document.getElementById('bill-due').value = bill.BillDue;
+                    document.getElementById('bill-frequency').value = bill.BillFrequency;
+                    document.getElementById('bill-amount').value = bill.BillAmt;
+                    billForm.querySelector('input[name="action"]').value = 'update';
+                    billModal.style.display = 'block';
+                }
+            };
+
+            window.deleteBill = async (id) => {
+                if (confirm('Are you sure you want to delete this bill reminder?')) {
+                    const response = await fetch('bills_process.php', {
+                        method: 'POST',
+                        body: new URLSearchParams({ action: 'delete', reminder_id: id })
+                    });
+                    const data = await response.json();
+                    alert(data.success || data.error);
+                    fetchBills();
+                }
+            };
+
+            window.togglePaid = async (id) => {
+                const bill = bills.find(b => b.ReminderID === id);
+                if (bill) {
+                    const response = await fetch('bills_process.php', {
+                        method: 'POST',
+                        body: new URLSearchParams({ action: 'togglePaid', reminder_id: id, paid: !bill.Paid })
+                    });
+                    const data = await response.json();
+                    alert(data.success || data.error);
+                    fetchBills();
+                }
+            };
+
+            fetchBills();
+        });
+    </script>
+</body>
+</html>

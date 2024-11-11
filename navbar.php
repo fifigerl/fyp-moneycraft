@@ -19,10 +19,10 @@
                     <div class="dropdown-content">
                         <a href="budgets.php">My Budgets</a>
                         <a href="transactions.php">My Transactions</a>
-                        <a href="my-savings-goals.php">My Savings Goals</a>
-                        <a href="my-bills.php">My Bills</a>
-                        <a href="my-feedbacks.php">My Feedbacks</a>
-                        <a href="my-report.php">My Report</a>
+                        <a href="savings.php">My Savings Goals</a>
+                        <a href="bills.php">My Bills</a>
+                        <a href="feedbacks.php">My Feedbacks</a>
+                        <a href="report.php">My Report</a>
                     </div>
                 </li>
                 <li><a href="learning-center.php">Learning Center</a></li>
