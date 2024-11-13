@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MoneyCraft Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../css/navbar.css">
 </head>
 <body>
     <nav class="navbar">
@@ -17,16 +17,16 @@
                 <li class="dropdown">
                     <a href="#" class="dropbtn">Financial Activity</a>
                     <div class="dropdown-content">
-                        <a href="budgets.php">My Budgets</a>
-                        <a href="transactions.php">My Transactions</a>
-                        <a href="savings.php">My Savings Goals</a>
-                        <a href="bills.php">My Bills</a>
-                        <a href="feedbacks.php">My Feedbacks</a>
-                        <a href="report.php">My Report</a>
+                        <a href="../drpdown/budgets.php">My Budgets</a>
+                        <a href="../drpdown/transactions.php">My Transactions</a>
+                        <a href="../drpdown/savings.php">My Savings Goals</a>
+                        <a href="../drpdown/bills.php">My Bills</a>
+                        <a href="../drpdown/feedbacks.php">My Feedbacks</a>
+                        <a href="../drpdown/report.php">My Report</a>
                     </div>
                 </li>
-                <li><a href="learning-center.php">Learning Center</a></li>
-                <li><a href="account.php">Account</a></li>
+                <li><a href="../learning.php">Learning Center</a></li>
+                <li><a href="../account.php">Account</a></li> 
             </ul>
         </div>
     </nav>

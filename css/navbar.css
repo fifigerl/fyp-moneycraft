@@ -14,7 +14,8 @@
     padding: 15px 30px;
     font-family: 'Arial', sans-serif;
     border-bottom: 1px solid #f0f0f0;
-    position: sticky;
+    position: fixed;
+    width: 100%;
     top: 0;
     z-index: 1000;
 }
@@ -31,13 +32,6 @@
     margin-right: 10px;
 }
 
-.brand-name {
-    color: #f79256;
-    font-size: 18px;
-    font-weight: bold;
-    letter-spacing: 1px;
-}
-
 /* Navbar links */
 .nav-links {
     list-style: none;
@@ -50,11 +44,11 @@
     font-size: 16px;
     color: #1b1b1b;
     font-weight: 500;
+    transition: color 0.3s;
 }
 
-/* Active link styling */
-.nav-links .active {
-    color: #ffcc00;
+.nav-links a:hover {
+    color: #0077b6;
 }
 
 /* Dropdown menu */
@@ -87,15 +81,6 @@
     display: block;
 }
 
-/* Account and other links alignment */
-.nav-links a {
-    transition: color 0.3s;
-}
-
-.nav-links a:hover {
-    color: #0077b6;
-}
-
 /* Mobile-friendly styling */
 @media (max-width: 768px) {
     .navbar {
@@ -107,4 +92,11 @@
         flex-direction: column;
         gap: 10px;
     }
+}
+
+/* Ensure content is not blocked by navbar */
+body, html {
+    height: 100%;
+    overflow-x: hidden;
+    padding-top: 80px; /* Adjust based on navbar height */
 }
