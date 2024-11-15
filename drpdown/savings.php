@@ -12,7 +12,7 @@ $savingsGoals = $conn->query("SELECT * FROM Savings WHERE UserID = 1"); // Repla
     <meta charset="UTF-8">
     <title>My Savings Goals</title>
     <link rel="stylesheet" href="../styles.css">
-    <link rel="stylesheet" href="css/navbar.css"> <!-- Ensure the path is correct -->
+    <link rel="stylesheet" href="css/navbar.css"> 
 </head>
 <body>
     <div class="container">

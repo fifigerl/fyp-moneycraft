@@ -24,9 +24,12 @@ body {
 }
 
 .logo img {
-    width: 200px; /* Set the width to your desired size */
-    height: auto; /* This maintains the aspect ratio */
+    width: 200px;
+    /* Set the width to your desired size */
+    height: auto;
+    /* This maintains the aspect ratio */
 }
+
 h2 {
     margin: 1.5rem 0;
     font-size: large;
@@ -55,7 +58,7 @@ h2 {
 .login-btn {
     background-color: #f5b400;
     color: #fff;
-    border: 2px solid rgb(222, 202, 130) ;
+    border: 2px solid rgb(222, 202, 130);
     padding: 0.75rem 1rem;
     margin-top: 1rem;
     border-radius: 5px;
@@ -65,16 +68,16 @@ h2 {
 }
 
 .signup-btn {
-        background-color: #f5b400;
-        color: #fff;
-        border: 2px solid rgb(222, 202, 130) ;
-        padding: 0.75rem 1rem;
-        margin-top: 1rem;
-        border-radius: 5px;
-        width: 100%;
-        cursor: pointer;
-        font-weight: bold;
-    }
+    background-color: #f5b400;
+    color: #fff;
+    border: 2px solid rgb(222, 202, 130);
+    padding: 0.75rem 1rem;
+    margin-top: 1rem;
+    border-radius: 5px;
+    width: 100%;
+    cursor: pointer;
+    font-weight: bold;
+}
 
 
 .login-btn:hover {
@@ -116,143 +119,65 @@ h2 {
     text-decoration: underline;
 }
 
-
-
-/* index css */
-body {
+/* Styles specific to index.php */
+body.index-page {
     font-family: 'Arial', sans-serif;
     background-color: #f9f9f9;
     margin: 0;
-    padding: 0;
-    color: #333;
+    padding: 20px;
 }
 
-.dashboard-container {
+.index-page .dashboard-container {
     display: flex;
     justify-content: space-between;
-    padding: 20px;
+    margin-bottom: 20px;
 }
 
-.left-panel, .right-panel {
-    width: 45%;
+.index-page .left-panel, .index-page .right-panel {
+    width: 48%;
+}
+
+.index-page .balance, .index-page .bills, .index-page .video-section {
     background-color: #fff;
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.index-page .balance h2, .index-page .bills h3, .index-page .video-section h2 {
+    color: #4A148C;
+    margin-bottom: 10px;
+}
+
+.index-page .transaction-history {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Savings Goals Section */
-.savings-goals {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.savings-goals h2 {
-    font-size: 36px;
-    color: #ffcc00;
-}
-
-.savings-goals p {
-    font-size: 18px;
-    color: #888;
-}
-
-/* Bills Section */
-.bills {
-    margin-bottom: 20px;
-}
-
-.bills h3 {
-    font-size: 18px;
-    margin: 0;
-}
-
-.bills p {
-    font-size: 24px;
-    color: #333;
-}
-
-/* Food Expenses Section */
-.food-expenses h3 {
-    font-size: 18px;
-    margin: 0;
-}
-
-.food-expenses p {
-    font-size: 24px;
-    color: #f00;
-}
-
-/* Video Section */
-.video-section h2 {
-    font-size: 24px;
-    color: #5a2ba0;
-}
-
-.video {
-    margin: 10px 0;
-}
-
-.video p {
-    color: #555;
-    font-size: 14px;
-}
-
-/* Transaction History */
-.transaction-history {
-    margin: 30px;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.transaction-history h3 {
-    font-size: 20px;
-    margin-bottom: 20px;
-}
-
-.filter {
-    margin-bottom: 20px;
-}
-
-.filter button {
-    margin-right: 10px;
-    padding: 10px;
-    background-color: #ffcc00;
-    border: none;
-    border-radius: 5px;
-    color: #333;
-    cursor: pointer;
-}
-
-.transaction-item {
+.index-page .transaction-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 10px 0;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #ddd;
 }
 
-.transaction-item img {
-    width: 24px;
-    margin-right: 10px;
-}
-
-.transaction-item p {
-    flex: 1;
-    margin: 0;
-}
-
-.transaction-item .amount {
-    font-weight: bold;
-}
-
-.transaction-item:last-child {
+.index-page .transaction-item:last-child {
     border-bottom: none;
 }
 
+.index-page .transaction-item p {
+    margin: 0;
+    color: #333;
+}
 
+.index-page .transaction-item .amount {
+    color: #5F2D86;
+    font-weight: bold;
+}
 
 /* Transactions.php styles */
 * {
@@ -420,7 +345,9 @@ header h1 {
     color: #000;
 }
 
-#transaction-form input, #transaction-form select, #transaction-form button {
+#transaction-form input,
+#transaction-form select,
+#transaction-form button {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
@@ -440,7 +367,9 @@ header h1 {
 }
 
 /* Budgets.php styles*/
-.budget-item, .balance-container, .transaction-history {
+.budget-item,
+.balance-container,
+.transaction-history {
     margin: 20px;
 }
 
@@ -490,8 +419,8 @@ header h1 {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgb(0,0,0);
-    background-color: rgba(0,0,0,0.4);
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.4);
     padding-top: 60px;
 }
 
@@ -508,7 +437,13 @@ header h1 {
 .container {
     max-width: 800px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 40px;
+}
+
+.container h1 {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #ddd;
 }
 
 .bill-item {
@@ -531,6 +466,7 @@ button {
     border-radius: 5px;
     cursor: pointer;
     margin-right: 5px;
+    margin-bottom: 20px;
 }
 
 button:hover {
@@ -556,6 +492,7 @@ button:hover {
     border-radius: 8px;
     width: 400px;
     text-align: center;
+    
 }
 
 .close {
@@ -621,7 +558,8 @@ button:hover {
     overflow: hidden;
 }
 
-.edit-button, .delete-button {
+.edit-button,
+.delete-button {
     background-color: #5F2D86;
     color: white;
     border: none;
@@ -632,7 +570,8 @@ button:hover {
     text-decoration: none;
 }
 
-.edit-button:hover, .delete-button:hover {
+.edit-button:hover,
+.delete-button:hover {
     background-color: #4d2269;
 }
 
