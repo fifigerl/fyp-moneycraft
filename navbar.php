@@ -13,20 +13,26 @@
         </div>
         <div class="container">
             <ul class="nav-links">
-                <li><a href="index.php">Home</a></li>
+                <li><a href="../index.php">Home</a></li>
                 <li class="dropdown">
                     <a href="#" class="dropbtn">Financial Activity</a>
                     <div class="dropdown-content">
-                        <a href="../drpdown/budgets.php">My Budgets</a>
                         <a href="../drpdown/transactions.php">My Transactions</a>
+                        <a href="../drpdown/budgets.php">My Budgets</a>
                         <a href="../drpdown/savings.php">My Savings Goals</a>
                         <a href="../drpdown/bills.php">My Bills</a>
-                        <a href="../drpdown/add_feedbacks.php">My Feedbacks</a>
+                        <a href="../drpdown/feedbacks.php">My Feedbacks</a>
                         <a href="../drpdown/report.php">My Report</a>
                     </div>
                 </li>
                 <li><a href="../financial.php">Learning Center</a></li>
-                <li><a href="../account.php">Account</a></li> 
+                <li class="dropdown">
+                    <a href="#" class="dropbtn">Account</a>
+                    <div class="dropdown-content">
+                        <a href="../account.php">Account Settings</a>
+                        <a href="../logout.php">Logout</a>
+                        
+                    </div>
             </ul>
         </div>
     </nav>

@@ -1,4 +1,5 @@
 <?php 
+session_start();
 include '../config.php';
 
 // Ensure the uploads directory exists and is writable
@@ -6,6 +7,9 @@ $uploadDir = 'uploads';
 if (!is_dir($uploadDir)) {
     mkdir($uploadDir, 0755, true);
 }
+
+// Get the logged-in user's ID from the session
+$userId = $_SESSION['id'];
 
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 $id = $_POST['savings_id'] ?? $_GET['id'] ?? null;
@@ -16,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (($action === 'update_progress' || $action === 'undo_progress') && $id) {
         $amount = $_POST['amount'] ?? 0;
         $amount = $action === 'undo_progress' ? -$amount : $amount;
-        $sql = "UPDATE Savings SET CurrentSavings = CurrentSavings + $amount WHERE SavingsID = $id";
+        $sql = "UPDATE Savings SET CurrentSavings = CurrentSavings + $amount WHERE SavingsID = $id AND UserID = $userId";
         if ($conn->query($sql) === TRUE) {
             $response['success'] = true;
         } else {
@@ -48,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($action === 'create') {
-            $sql = "INSERT INTO Savings (UserID, SavingsTitle, SavingsAmt, TargetDate, SavingsPicture) VALUES (1, '$title', $amount, '$targetDate', '$target')";
+            $sql = "INSERT INTO Savings (UserID, SavingsTitle, SavingsAmt, TargetDate, SavingsPicture) VALUES ($userId, '$title', $amount, '$targetDate', '$target')";
             if ($conn->query($sql) === TRUE) {
                 $response['success'] = true;
             } else {
@@ -56,8 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } elseif ($action === 'edit' && $id) {
             $sql = $picture ? 
-                "UPDATE Savings SET SavingsTitle = '$title', SavingsAmt = $amount, TargetDate = '$targetDate', SavingsPicture = '$target' WHERE SavingsID = $id" :
-                "UPDATE Savings SET SavingsTitle = '$title', SavingsAmt = $amount, TargetDate = '$targetDate' WHERE SavingsID = $id";
+                "UPDATE Savings SET SavingsTitle = '$title', SavingsAmt = $amount, TargetDate = '$targetDate', SavingsPicture = '$target' WHERE SavingsID = $id AND UserID = $userId" :
+                "UPDATE Savings SET SavingsTitle = '$title', SavingsAmt = $amount, TargetDate = '$targetDate' WHERE SavingsID = $id AND UserID = $userId";
             
             if ($conn->query($sql) === TRUE) {
                 $response['success'] = true;
@@ -67,14 +71,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 } elseif ($action === 'delete' && $id) {
-    $sql = "DELETE FROM Savings WHERE SavingsID = $id";
+    $sql = "DELETE FROM Savings WHERE SavingsID = $id AND UserID = $userId";
     if ($conn->query($sql) === TRUE) {
         $response['success'] = true;
     } else {
         $response['error'] = 'Failed to delete the savings goal: ' . $conn->error;
     }
 } elseif ($action === 'fetch' && $id) {
-    $result = $conn->query("SELECT * FROM Savings WHERE SavingsID = $id");
+    $result = $conn->query("SELECT * FROM Savings WHERE SavingsID = $id AND UserID = $userId");
     $response = $result->fetch_assoc();
 }
 

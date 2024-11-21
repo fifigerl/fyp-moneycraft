@@ -125,7 +125,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .error {
             color: red;
             font-size: 0.9em;
+
+            
+            
         }
+
+        .back-btn {
+    background-color: #4a148c;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: none; /* Remove underline from link */
+    display: inline-block; /* Ensure it behaves like a button */
+    margin-bottom: 20px; /* Add some space below the button */
+    margin-top: 30px;
+}
+
+.back-btn:hover {
+    background-color: #3b0d6b;
+}
     </style>
 </head>
 <body>
@@ -149,6 +170,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
             <button type="submit" class="submit-btn">Submit Material</button>
         </form>
+        <a href="manage_materials.php" class="back-btn">Back</a>
     </div>
 </body>
 </html> 

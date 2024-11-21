@@ -1,5 +1,21 @@
-<?php include '../config.php'; ?>
-<?php include '../navbar.php'; ?>
+<?php
+// Start the session
+session_start();
+
+// Include config file
+require_once '../config.php';
+
+// Check if the user is logged in, if not redirect to login page
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+    header("location: ../login.php");
+    exit;
+}
+
+// Get the logged-in user's ID
+$user_id = $_SESSION['id']; // Use session user ID
+
+include '../navbar.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -55,7 +71,7 @@
             billForm.onsubmit = async (e) => {
                 e.preventDefault();
                 const formData = new FormData(billForm);
-                formData.append('user_id', 1); // Replace with dynamic user ID
+                formData.append('user_id', <?php echo $user_id; ?>); // Use dynamic user ID
 
                 const response = await fetch('bills_process.php', {
                     method: 'POST',
@@ -70,7 +86,7 @@
             async function fetchBills() {
                 const response = await fetch('bills_process.php', {
                     method: 'POST',
-                    body: new URLSearchParams({ action: 'read', user_id: 1 }) // Replace with dynamic user ID
+                    body: new URLSearchParams({ action: 'read', user_id: <?php echo $user_id; ?> }) // Use dynamic user ID
                 });
                 bills = await response.json();
                 renderBills(bills);

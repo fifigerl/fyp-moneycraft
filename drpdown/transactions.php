@@ -1,8 +1,19 @@
 <?php
+session_start();
 include '../config.php';
-$userId = 1;
+include '../navbar.php'; 
+
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+    header("location: ../login.php");
+    exit;
+}
+
+// Get the logged-in user's ID
+$user_id = $_SESSION['id']; // Use session user ID
+
+
+
 ?>
-<?php include '../navbar.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

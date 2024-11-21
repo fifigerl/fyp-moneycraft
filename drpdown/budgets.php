@@ -1,17 +1,35 @@
-<?php include '../config.php'; ?>
-<?php include '../navbar.php'; ?>
+<?php
+session_start();
+include '../config.php';
+include '../navbar.php';
+
+// Check if the user is logged in, if not redirect to login page
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+    header("location: ../login.php");
+    exit;
+}
+
+// Get the logged-in user's ID
+$user_id = $_SESSION['id']; // Use session user ID
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>My Budgets</title>
     <link rel="stylesheet" href="../styles.css">
-    <link rel="stylesheet" href="navbar.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <h1>My Budgets</h1>
-        <button id="add-budget-btn">+ Add Budget</button>
+        <div class="budget-header">
+            <h1 class="budget-title">My Budgets</h1>
+            <button id="add-budget-btn" class="add-budget-btn">
+                <i class="fas fa-plus"></i> Add Budget
+            </button>
+        </div>
         <div id="budgets-list"></div>
     </div>
 
@@ -37,14 +55,6 @@
                         <option value="Shopping">Shopping</option>
                         <option value="Other">Other</option>
                     </optgroup>
-                    <optgroup label="Income">
-                        <option value="Allowance">Allowance</option>
-                        <option value="Part-time Job">Part-time Job</option>
-                        <option value="Scholarships">Scholarships</option>
-                        <option value="Student Loans">Student Loans</option>
-                        <option value="Freelance Work">Freelance Work</option>
-                        <option value="Other">Other</option>
-                    </optgroup>
                 </select>
                 <input type="number" name="amount" id="budget-amount" placeholder="Amount" required>
                 <input type="date" name="start_date" id="budget-start" required>
@@ -59,9 +69,31 @@
             const budgetsList = document.getElementById('budgets-list');
             const budgetModal = document.getElementById('budget-modal');
             const closeModal = document.querySelector('.close');
-            const addBudgetBtn = document.getElementById('add-budget-btn');
             const budgetForm = document.getElementById('budget-form');
+            const addBudgetBtn = document.getElementById('add-budget-btn');
             let submitted = false;
+
+            // Add Budget button click handler
+            addBudgetBtn.addEventListener('click', () => {
+                budgetForm.reset();
+                document.getElementById('budget_id').value = '';
+                budgetModal.style.display = 'block';
+            });
+
+            // Function to get appropriate icon based on category
+            function getCategoryIcon(category) {
+                const icons = {
+                    'Groceries': 'fa-shopping-basket',
+                    'Transportation': 'fa-car',
+                    'Shopping': 'fa-shopping-bag',
+                    'Dining Out': 'fa-utensils',
+                    'Entertainment': 'fa-film',
+                    'Utilities': 'fa-bolt',
+                    'Rent': 'fa-home',
+                    'Other': 'fa-wallet'
+                };
+                return icons[category] || 'fa-wallet';
+            }
 
             async function fetchBudgets() {
                 try {
@@ -95,18 +127,36 @@
                     const spent = calculateSpent(budget, transactions);
                     const progress = (spent / budget.BudgetAmt) * 100;
                     const budgetDiv = document.createElement('div');
-                    budgetDiv.classList.add('budget');
+                    budgetDiv.classList.add('budget-item');
+                    
+                    const icon = getCategoryIcon(budget.BudgetCat);
                     budgetDiv.innerHTML = `
-                        <div class="budget-header">
-                            <h3>${budget.BudgetTitle}</h3>
-                            <p>RM${spent.toFixed(2)} / RM${budget.BudgetAmt.toFixed(2)}</p>
+                        <div class="budget-icon">
+                            <i class="fas ${icon}"></i>
                         </div>
-                        <div class="progress-bar">
-                            <div class="progress" style="width: ${progress}%;"></div>
+                        <div class="budget-details">
+                            <div class="budget-header">
+                                <h3>${budget.BudgetTitle}</h3>
+                                <div class="budget-actions">
+                                    <button onclick='editBudget(${JSON.stringify(budget)})' class="edit-btn">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    <button onclick="deleteBudget(${budget.BudgetID})" class="delete-btn">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="budget-amounts">
+                                <span class="total-balance">Total Balance: RM${budget.BudgetAmt.toFixed(2)}</span>
+                                <span class="total-expense">Total Expense: RM${spent.toFixed(2)}</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: ${progress}%"></div>
+                            </div>
+                            <div class="budget-status">
+                                ${progress.toFixed(0)}% of your budget used
+                            </div>
                         </div>
-                        <p>${progress.toFixed(2)}% of your budget used</p>
-                        <button onclick="deleteBudget(${budget.BudgetID})">Delete</button>
-                        <button onclick='editBudget(${JSON.stringify(budget)})'>Edit</button>
                     `;
                     budgetsList.appendChild(budgetDiv);
                 });
@@ -118,32 +168,29 @@
                     .reduce((total, tran) => total + parseFloat(tran.TranAmount), 0);
             }
 
-            addBudgetBtn.addEventListener('click', () => {
-                budgetForm.reset();
-                document.getElementById('budget_id').value = '';
-                budgetModal.style.display = 'block';
-            });
-
+            // Close modal when clicking X or outside
             closeModal.addEventListener('click', () => {
                 budgetModal.style.display = 'none';
             });
 
+            window.addEventListener('click', (event) => {
+                if (event.target === budgetModal) {
+                    budgetModal.style.display = 'none';
+                }
+            });
+
             budgetForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-
                 if (submitted) return;
                 submitted = true;
 
                 const formData = new FormData(budgetForm);
-                formData.append("action", "save");
-
                 try {
                     const response = await fetch('budgets_process.php', {
                         method: 'POST',
                         body: formData
                     });
                     const data = await response.json();
-                    alert(data.success || data.error);
                     if (data.success) {
                         budgetModal.style.display = 'none';
                         budgetForm.reset();
@@ -168,8 +215,9 @@
                             body: formData
                         });
                         const data = await response.json();
-                        alert(data.success || data.error);
-                        fetchBudgets();
+                        if (data.success) {
+                            fetchBudgets();
+                        }
                     } catch (error) {
                         console.error("Error deleting budget:", error);
                     }
@@ -181,37 +229,12 @@
                 document.getElementById('budget-title').value = budget.BudgetTitle;
                 document.getElementById('budget-category').value = budget.BudgetCat;
                 document.getElementById('budget-amount').value = budget.BudgetAmt;
-                document.getElementById('budget-start').value = budget.BudgetStart;
-                document.getElementById('budget-end').value = budget.BudgetEnd;
+                document.getElementById('budget-start').value = budget.BudgetStart.split(' ')[0];
+                document.getElementById('budget-end').value = budget.BudgetEnd.split(' ')[0];
                 budgetModal.style.display = 'block';
             };
 
-            async function fetchCategories() {
-                try {
-                    const response = await fetch('category_process.php', {
-                        method: 'GET'
-                    });
-                    const data = await response.json();
-                    renderCategoryOptions(data);
-                } catch (error) {
-                    console.error("Error fetching categories:", error);
-                }
-            }
-
-            function renderCategoryOptions(categories) {
-                const categorySelect = document.getElementById('budget-category');
-                categorySelect.innerHTML = '';
-
-                categories.forEach(category => {
-                    const option = document.createElement('option');
-                    option.value = category.Name;
-                    option.textContent = category.Name;
-                    categorySelect.appendChild(option);
-                });
-            }
-
             fetchBudgets();
-            fetchCategories();
         });
     </script>
 </body>

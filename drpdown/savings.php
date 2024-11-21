@@ -1,9 +1,19 @@
 <?php
+session_start();
 include '../config.php';
-include '../navbar.php'; // Include the navbar
+include '../navbar.php'; 
 
-// Fetch all savings goals to display them
-$savingsGoals = $conn->query("SELECT * FROM Savings WHERE UserID = 1"); // Replace with dynamic UserID
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+    header("location: ../login.php");
+    exit;
+}
+
+// Get the logged-in user's ID
+$user_id = $_SESSION['id']; // Use session user ID
+
+// Fetch savings goals for the logged-in user
+$savingsGoals = $conn->query("SELECT * FROM Savings WHERE UserID = $user_id");
+
 ?>
 
 <!DOCTYPE html>
@@ -30,11 +40,6 @@ $savingsGoals = $conn->query("SELECT * FROM Savings WHERE UserID = 1"); // Repla
                         <p><?php echo round(($row['CurrentSavings'] / $row['SavingsAmt']) * 100, 2); ?>%</p>
                         <button onclick="editGoal(<?php echo $row['SavingsID']; ?>)" class="edit-button">Edit</button>
                         <button onclick="deleteGoal(<?php echo $row['SavingsID']; ?>)" class="delete-button">Delete</button>
-                        <form onsubmit="updateProgress(event, <?php echo $row['SavingsID']; ?>)">
-                            <input type="number" name="amount" placeholder="Add Amount" required>
-                            <button type="submit">Add</button>
-                            <button type="button" onclick="updateProgress(event, <?php echo $row['SavingsID']; ?>, true)">Undo</button>
-                        </form>
                     </div>
                 </div>
             <?php endwhile; ?>
@@ -76,7 +81,7 @@ $savingsGoals = $conn->query("SELECT * FROM Savings WHERE UserID = 1"); // Repla
             goalForm.onsubmit = async (e) => {
                 e.preventDefault();
                 const formData = new FormData(goalForm);
-                formData.append('user_id', 1); // Replace with dynamic user ID
+                formData.append('user_id', <?php echo $user_id; ?>); // Use dynamic user ID
 
                 const response = await fetch('savings_process.php', {
                     method: 'POST',
@@ -116,31 +121,6 @@ $savingsGoals = $conn->query("SELECT * FROM Savings WHERE UserID = 1"); // Repla
                                 location.reload();
                             }
                         });
-                }
-            };
-
-            window.updateProgress = async (e, id, isUndo = false) => {
-                e.preventDefault();
-                const form = e.target.closest('form');
-                const amount = parseFloat(form.elements['amount'].value);
-                if (isNaN(amount) || amount <= 0) {
-                    alert("Please enter a valid amount.");
-                    return;
-                }
-                const formData = new FormData();
-                formData.append('action', isUndo ? 'undo_progress' : 'update_progress');
-                formData.append('id', id);
-                formData.append('amount', amount);
-
-                const response = await fetch('savings_process.php', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
-                alert(data.success ? "Progress updated successfully!" : `Error: ${data.error}`);
-                if (data.success) {
-                    location.reload();
                 }
             };
         });

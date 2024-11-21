@@ -11,13 +11,14 @@
     justify-content: space-between;
     align-items: center;
     background-color: white;
-    padding: 15px 30px;
+    padding: 8px 20px;
     font-family: 'Arial', sans-serif;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid #e0e0e0;
     position: fixed;
     width: 100%;
     top: 0;
     z-index: 1000;
+    pointer-events: auto; /* Allow interaction */
 }
 
 /* Logo and brand name styling */
@@ -27,7 +28,7 @@
 }
 
 .logo img {
-    width: 80px;
+    width: 150px;
     height: auto;
     margin-right: 10px;
 }
@@ -98,5 +99,6 @@
 body, html {
     height: 100%;
     overflow-x: hidden;
-    padding-top: 80px; /* Adjust based on navbar height */
+    padding-top: 60px; /* Adjusted to match the navbar height */
+    overflow-y: auto;
 }

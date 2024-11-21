@@ -22,66 +22,8 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Financial Education Resources</title>
     <link rel="stylesheet" href="navbar.css">
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f9f9f9;
-            padding: 20px;
-        }
-        .resources-container {
-            max-width: 800px;
-            margin: auto;
-        }
-        .resources-container h2 {
-            margin-bottom: 30px;
-            padding-left: 10px;
-            color: #4a148c;
-        }
-        .resource-item {
-            display: flex;
-            align-items: center;
-            background-color: #fff;
-            margin-bottom: 20px;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .resource-item iframe {
-            width: 350px;
-            height: 200px;
-            margin-right: 20px;
-            border-radius: 8px;
-        }
-        .resource-info {
-            flex: 1;
-        }
-        .resource-info h3 {
-            color: #4a148c;
-            margin-bottom: 10px;
-        }
-        .resource-info p {
-            margin-bottom: 5px;
-            color: #1b1b1b;
-        }
-        .resource-info .date {
-            font-size: 0.9em;
-            color: #666;
-        }
-        .learn-more-btn {
-            background-color: #ffcc00;
-            color: #1b1b1b;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .learn-more-btn:hover {
-            background-color: #e6b800;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
+           
 </head>
 <body>
     <?php include 'navbar.php'; ?>

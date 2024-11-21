@@ -10,6 +10,12 @@ $username = $password = "";
 $username_err = $password_err = "";
 $login_err = "";
 
+// Check for logout success message
+$logout_message = "";
+if (isset($_GET['logout']) && $_GET['logout'] == 'success') {
+    $logout_message = "You have been successfully logged out.";
+}
+
 // Processing form data when form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Check if username is empty
@@ -89,6 +95,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>MoneyCraft Login</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+    </style>
 </head>
 <body>
     <div class="login-container">
@@ -97,6 +118,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
         <h2>Login to your Account</h2>
         
+        <?php if (!empty($logout_message)): ?>
+            <div class="alert alert-success">
+                <?php echo $logout_message; ?>
+            </div>
+        <?php endif; ?>
+
         <?php 
         if (!empty($login_err)) {
             echo '<div class="error-message">' . $login_err . '</div>';
@@ -116,7 +143,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
             <button type="submit" class="login-btn">Log In</button>
         </form>
-        <p class="signup-text">Don’t Have An Account? <a href="signup.php">Sign Up</a></p>
+        <p class="signup-text">Don't Have An Account? <a href="signup.php">Sign Up</a></p>
     </div>
 </body>
 </html>

@@ -58,7 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             $_SESSION["admin_username"] = $admin_username;                            
                             
                             // Redirect admin to admin dashboard page
-                            header("location: admin_dashboard.php");
+                            header("location: admin_manage_users.php");
                         } else {
                             // Password is not valid, display a generic error message
                             $login_err = "Invalid admin username or password.";

@@ -1,11 +1,22 @@
 <?php
-include 'config.php';
+// Start the session
+session_start();
+
 include 'navbar.php';
+
+// Include config file
+require_once 'config.php';
+
+// Check if the user is logged in, if not redirect to login page
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+    header("location: login.php");
+    exit;
+}
 
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'];
-    $userId = $_POST['user_id'] ?? null;
+    $userId = $_SESSION['id']; // Use session user ID
     $username = $_POST['username'] ?? '';
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
@@ -18,11 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         move_uploaded_file($_FILES['profile_picture']['tmp_name'], $targetFile);
     }
 
-    if ($action === 'create') {
-        $hashedPwd = password_hash($password, PASSWORD_DEFAULT);
-        $sql = "INSERT INTO users (Username, UserEmail, UserPwd, createdAt, ProfilePicture) VALUES ('$username', '$email', '$hashedPwd', CURDATE(), '$targetFile')";
-        $conn->query($sql);
-    } elseif ($action === 'update' && $userId) {
+    if ($action === 'update') {
         $hashedPwd = password_hash($password, PASSWORD_DEFAULT);
         $sql = "UPDATE users SET Username='$username', UserEmail='$email', UserPwd='$hashedPwd'";
         
@@ -32,14 +39,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $sql .= " WHERE UserID=$userId";
         $conn->query($sql);
-    } elseif ($action === 'delete' && $userId) {
+    } elseif ($action === 'delete') {
         $sql = "DELETE FROM users WHERE UserID=$userId";
         $conn->query($sql);
+        // Log the user out after account deletion
+        session_destroy();
+        header("location: login.php");
+        exit;
     }
 }
 
 // Fetch user data
-$userId = 1; // Replace with dynamic user ID
+$userId = $_SESSION['id']; // Use session user ID
 $user = $conn->query("SELECT * FROM users WHERE UserID = $userId")->fetch_assoc();
 ?>
 
@@ -55,15 +66,15 @@ $user = $conn->query("SELECT * FROM users WHERE UserID = $userId")->fetch_assoc(
     <div class="account-container">
         <h1>Your Account</h1>
         <div class="profile-picture">
-            <img src="<?php echo $user['ProfilePicture']; ?>" alt="Profile Picture">
+            <img src="<?php echo htmlspecialchars($user['ProfilePicture']); ?>" alt="Profile Picture">
         </div>
         <form method="POST" action="account.php" enctype="multipart/form-data">
             <input type="hidden" name="action" value="update">
-            <input type="hidden" name="user_id" value="<?php echo $user['UserID']; ?>">
+            <input type="hidden" name="user_id" value="<?php echo htmlspecialchars($user['UserID']); ?>">
             <label for="username">Name</label>
-            <input type="text" name="username" value="<?php echo $user['Username']; ?>" required>
+            <input type="text" name="username" value="<?php echo htmlspecialchars($user['Username']); ?>" required>
             <label for="email">Email</label>
-            <input type="email" name="email" value="<?php echo $user['UserEmail']; ?>" required>
+            <input type="email" name="email" value="<?php echo htmlspecialchars($user['UserEmail']); ?>" required>
             <label for="password">Password</label>
             <input type="password" name="password" required>
             <label for="profile_picture">Profile Picture</label>
@@ -74,7 +85,7 @@ $user = $conn->query("SELECT * FROM users WHERE UserID = $userId")->fetch_assoc(
         </form>
         <form method="POST" action="account.php" onsubmit="return confirm('Are you sure you want to delete your account?');">
             <input type="hidden" name="action" value="delete">
-            <input type="hidden" name="user_id" value="<?php echo $user['UserID']; ?>">
+            <input type="hidden" name="user_id" value="<?php echo htmlspecialchars($user['UserID']); ?>">
             <div class="button-group">
                 <button type="submit">Delete Account</button>
             </div>

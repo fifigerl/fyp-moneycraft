@@ -1,6 +1,9 @@
 <?php
 include '../config.php';
-$userId = 1;
+session_start();
+
+// Get the logged-in user's ID from the session
+$userId = $_SESSION['id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
