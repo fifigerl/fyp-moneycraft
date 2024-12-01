@@ -16,8 +16,8 @@
             <li><a href="admin_manage_users.php">Manage Users</a></li>
                 <li><a href="manage_materials.php">Manage Materials</a></li>
                 <li><a href="admin_manage_feedbacks.php">User Feedbacks</a></li>
-                <li><a href="admin_account.php">Logout</a></li>
-            </ul>
+                <li><a href="admin.php">Logout</a></li>
+            </ul> 
         </div>
     </nav>
 </body>

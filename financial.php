@@ -32,7 +32,7 @@ $conn->close();
         <?php foreach ($resources as $index => $resource): ?>
             <?php 
             // Hardcoded video IDs
-            $video_id = $index === 0 ? 'MXCvtC0HqLE' : 'G9PPtAKJ944'; 
+            $video_id = $index === 0 ? 'MXCvtC0HqLE' : 'bEElvs_5byk'; 
             ?>
             <div class="resource-item">
                 <iframe src="https://www.youtube.com/embed/<?php echo $video_id; ?>" frameborder="0" allowfullscreen></iframe>

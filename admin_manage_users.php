@@ -9,14 +9,18 @@ require_once 'config.php';
 // Add your admin authentication logic here
 
 // Fetch user data from the database
-$sql = "SELECT UserID, Username, UserEmail, createdAt FROM User";
+$sql = "SELECT UserID, Username, UserEmail, createdAt FROM Users";
 $result = $conn->query($sql);
 
 $users = [];
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $users[] = $row;
+if ($result) {
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $users[] = $row;
+        }
     }
+} else {
+    echo "Error: " . $conn->error;
 }
 
 // Fake recent activity logs for demonstration
@@ -213,7 +217,7 @@ $activity_logs = [
             </div>
             <div class="stat-card">
                 <h3>Active Users</h3>
-                <p><?php echo count(array_filter($users, function($user) { return $user['Status'] === 'Active'; })); ?></p>
+               
             </div>
             <div class="stat-card">
                 <h3>Total Transactions</h3>
