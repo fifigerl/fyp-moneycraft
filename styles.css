@@ -121,14 +121,13 @@ h2 {
 
 /*index.php styles*/
 
-/*index.php styles*/
-
 body.dashboard {
     font-family: 'Poppins', sans-serif;
     background-color: #f4f6f9;
     margin: 0;
-    padding: 20px;
+    padding: 0;
     overflow-x: hidden;
+    height: 100vh;
 }
 
 .dashboard-container {
@@ -137,7 +136,10 @@ body.dashboard {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
-    padding-top: 60px;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    height: calc(100vh - 60px);
 }
 
 .dashboard-widget {
@@ -147,6 +149,7 @@ body.dashboard {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
 }
 
 .dashboard-widget:hover {
@@ -154,106 +157,30 @@ body.dashboard {
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
-.dashboard-widget h3,
-.dashboard-video-section h2 {
+.dashboard-widget h3 {
     color: #4A148C;
     margin-bottom: 15px;
     font-size: 1.5rem;
     text-align: center;
 }
 
-.dashboard-progress-bar {
-    background-color: #e0e0e0;
-    border-radius: 5px;
-    overflow: hidden;
-    height: 20px;
-    margin-top: 15px;
-}
-
-.dashboard-progress {
-    background-color: #4A148C;
+/* Additional styling */
+html {
     height: 100%;
-    text-align: center;
-    color: #fff;
-    line-height: 20px;
-    transition: width 0.4s ease;
 }
 
-.dashboard-transaction-item,
-.dashboard-bill-item,
-.dashboard-saving-item,
-.dashboard-resource-item {
+body {
+    min-height: 100%;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #e0e0e0;
-    font-size: 0.9rem;
+    flex-direction: column;
 }
 
-.dashboard-transaction-item:last-child,
-.dashboard-bill-item:last-child,
-.dashboard-saving-item:last-child,
-.dashboard-resource-item:last-child {
-    border-bottom: none;
+.dashboard-container {
+    flex: 1; /* Ensures content stretches */
 }
 
-.dashboard-amount {
-    font-weight: bold;
-    color: #4A148C;
-}
 
-.dashboard-button {
-    background-color: #4A148C;
-    color: #fff;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-size: 1rem;
-    width: 100%;
-    margin-top: 10px;
-}
 
-.dashboard-button:hover {
-    background-color: #6a1b9a;
-}
-
-.dashboard-video-section iframe {
-    width: 100%;
-    height: 200px;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.dashboard-video-section p {
-    text-align: center;
-    margin-top: 10px;
-    color: #4a4a4a;
-    font-size: 1rem;
-}
-
-.dashboard-summary {
-    background-color: #e3f2fd;
-    color: #4A148C;
-    text-align: center;
-    padding: 15px;
-    border-radius: 8px;
-    margin-top: 20px;
-}
-
-.dashboard-summary p {
-    margin: 5px 0;
-    font-size: 1.1rem;
-}
-
-.icon {
-    width: 30px;
-    height: 30px;
-    margin-right: 10px;
-    color: #4A148C;
-}
 /* Transactions.php styles */
 transactions.php * {
     margin: 30px;
@@ -1189,5 +1116,65 @@ canvas {
     border-radius: 10px;
     background-color: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-widget.interactive-chart {
+    grid-column: span 2;
+}
+
+canvas {
+    width: 100% !important;
+    height: 300px !important;
+}
+
+.dashboard-widget:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-button {
+    background-color: #4A148C;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 1rem;
+    width: 100%;
+    margin-top: 10px;
+    position: relative;
+}
+
+.dashboard-button:hover {
+    background-color: #6a1b9a;
+}
+
+.tooltip {
+    visibility: hidden;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -60px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.icon:hover .tooltip,
+.dashboard-button:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        grid-template-columns: 1fr;
+    }
 }
 

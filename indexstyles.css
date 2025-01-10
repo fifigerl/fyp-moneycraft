@@ -1,0 +1,97 @@
+body.dashboard {
+    font-family: 'Arial', sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+.dashboard-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.dashboard-widget {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: transform 0.3s;
+}
+
+.dashboard-widget:hover {
+    transform: translateY(-5px);
+}
+
+.dashboard-widget h3 {
+    margin-top: 0;
+    color: #ff6600;
+}
+
+.dashboard-transaction-item,
+.dashboard-bill-item,
+.dashboard-saving-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.dashboard-transaction-item:hover,
+.dashboard-bill-item:hover,
+.dashboard-saving-item:hover {
+    background-color: #f0f0f0;
+}
+
+.dashboard-progress-bar {
+    background-color: #eee;
+    border-radius: 5px;
+    overflow: hidden;
+    width: 100%;
+    height: 10px;
+    margin: 5px 0;
+}
+
+.dashboard-progress {
+    background-color: #ff6600;
+    height: 100%;
+    transition: width 0.3s;
+}
+
+.dashboard-button {
+    background-color: #ff6600;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.dashboard-button:hover {
+    background-color: #e65c00;
+}
+
+.dashboard-video-section {
+    grid-column: span 2;
+    text-align: center;
+}
+
+.dashboard-video-section h2 {
+    color: #ff6600;
+}
+
+iframe {
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        grid-template-columns: 1fr;
+    }
+} 

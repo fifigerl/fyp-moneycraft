@@ -58,20 +58,24 @@ include '../navbar.php';
             const billForm = document.getElementById('bill-form');
             let bills = [];
 
+            // Open Add Bill Modal
             addBillBtn.onclick = () => {
                 billForm.reset();
-                billForm.action.value = 'create';
+                document.getElementById('reminder_id').value = '';
+                billForm.querySelector('input[name="action"]').value = 'create';
                 billModal.style.display = 'block';
             };
 
+            // Close Modal
             closeModal.onclick = () => {
                 billModal.style.display = 'none';
             };
 
+            // Handle Form Submission
             billForm.onsubmit = async (e) => {
                 e.preventDefault();
                 const formData = new FormData(billForm);
-                formData.append('user_id', <?php echo $user_id; ?>); // Use dynamic user ID
+                formData.append('user_id', <?php echo $user_id; ?>);
 
                 const response = await fetch('bills_process.php', {
                     method: 'POST',
@@ -83,15 +87,17 @@ include '../navbar.php';
                 billModal.style.display = 'none';
             };
 
+            // Fetch Bills from the Server
             async function fetchBills() {
                 const response = await fetch('bills_process.php', {
                     method: 'POST',
-                    body: new URLSearchParams({ action: 'read', user_id: <?php echo $user_id; ?> }) // Use dynamic user ID
+                    body: new URLSearchParams({ action: 'read', user_id: <?php echo $user_id; ?> })
                 });
                 bills = await response.json();
                 renderBills(bills);
             }
 
+            // Render Bills List
             function renderBills(bills) {
                 billsList.innerHTML = '';
                 const today = new Date();
@@ -113,9 +119,12 @@ include '../navbar.php';
                 });
             }
 
+            // Edit Bill
             window.editBill = (id) => {
-                const bill = bills.find(b => b.ReminderID === id);
+                console.log('Editing Bill ID:', id);
+                const bill = bills.find(b => b.ReminderID == id); // Loose equality to handle string ID
                 if (bill) {
+                    console.log('Bill found:', bill);
                     document.getElementById('reminder_id').value = bill.ReminderID;
                     document.getElementById('bill-title').value = bill.BillTitle;
                     document.getElementById('bill-due').value = bill.BillDue;
@@ -123,9 +132,13 @@ include '../navbar.php';
                     document.getElementById('bill-amount').value = bill.BillAmt;
                     billForm.querySelector('input[name="action"]').value = 'update';
                     billModal.style.display = 'block';
+                } else {
+                    console.error('Bill not found for ID:', id);
+                    alert('Unable to find the bill. Please refresh the page.');
                 }
             };
 
+            // Delete Bill
             window.deleteBill = async (id) => {
                 if (confirm('Are you sure you want to delete this bill reminder?')) {
                     const response = await fetch('bills_process.php', {
@@ -138,8 +151,9 @@ include '../navbar.php';
                 }
             };
 
+            // Toggle Paid Status
             window.togglePaid = async (id) => {
-                const bill = bills.find(b => b.ReminderID === id);
+                const bill = bills.find(b => b.ReminderID == id);
                 if (bill) {
                     const response = await fetch('bills_process.php', {
                         method: 'POST',
@@ -151,6 +165,7 @@ include '../navbar.php';
                 }
             };
 
+            // Initial Fetch
             fetchBills();
         });
     </script>
