@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validate credentials
     if (empty($username_err) && empty($password_err)) {
         // Prepare a select statement
-        $sql = "SELECT UserID, Username, UserPwd FROM users WHERE Username = ?";
+        $sql = "SELECT UserID, Username, UserPwd, status FROM users WHERE Username = ?";
 
         if ($stmt = $conn->prepare($sql)) {
             // Bind variables to the prepared statement as parameters
@@ -52,9 +52,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Check if username exists, if yes then verify password
                 if ($stmt->num_rows == 1) {
                     // Bind result variables
-                    $stmt->bind_result($id, $username, $hashed_password);
+                    $stmt->bind_result($id, $username, $hashed_password, $status);
                     if ($stmt->fetch()) {
-                        if (password_verify($password, $hashed_password)) {
+                        if ($status === 'inactive') {
+                            $login_err = "Your account has been suspended. Please contact support.";
+                        } elseif (password_verify($password, $hashed_password)) {
                             // Password is correct, so start a new session
                             session_start();
                             
@@ -108,6 +110,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             color: #155724;
             background-color: #d4edda;
             border-color: #c3e6cb;
+        }
+
+        .error-message {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            text-align: center;
         }
     </style>
 </head>

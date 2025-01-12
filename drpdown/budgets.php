@@ -3,14 +3,26 @@ session_start();
 include '../config.php';
 include '../navbar.php';
 
+// Include the logging function
+function logUserActivity($conn, $userId, $username, $action, $type = null) {
+    $stmt = $conn->prepare("INSERT INTO UserActivities (UserID, Username, Action, Type) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("isss", $userId, $username, $action, $type);
+    $stmt->execute();
+    $stmt->close();
+}
+
 // Check if the user is logged in, if not redirect to login page
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     header("location: ../login.php");
     exit;
 }
 
-// Get the logged-in user's ID
-$user_id = $_SESSION['id']; // Use session user ID
+// Get the logged-in user's ID and username
+$user_id = $_SESSION['id'];
+$username = $_SESSION['username'];
+
+// Log the action of viewing the budgets page
+logUserActivity($conn, $user_id, $username, "Viewed Budgets Page", "View");
 ?>
 
 <!DOCTYPE html>
@@ -69,114 +81,45 @@ $user_id = $_SESSION['id']; // Use session user ID
             const budgetsList = document.getElementById('budgets-list');
             const budgetModal = document.getElementById('budget-modal');
             const closeModal = document.querySelector('.close');
-            const budgetForm = document.getElementById('budget-form');
             const addBudgetBtn = document.getElementById('add-budget-btn');
+            const budgetForm = document.getElementById('budget-form');
             let submitted = false;
-
-            // Add Budget button click handler
-            addBudgetBtn.addEventListener('click', () => {
-                budgetForm.reset();
-                document.getElementById('budget_id').value = '';
-                budgetModal.style.display = 'block';
-            });
-
-            // Function to get appropriate icon based on category
-            function getCategoryIcon(category) {
-                const icons = {
-                    'Groceries': 'fa-shopping-basket',
-                    'Transportation': 'fa-car',
-                    'Shopping': 'fa-shopping-bag',
-                    'Dining Out': 'fa-utensils',
-                    'Entertainment': 'fa-film',
-                    'Utilities': 'fa-bolt',
-                    'Rent': 'fa-home',
-                    'Other': 'fa-wallet'
-                };
-                return icons[category] || 'fa-wallet';
-            }
 
             async function fetchBudgets() {
                 try {
                     const response = await fetch('budgets_process.php', {
                         method: 'GET'
                     });
-                    const budgets = await response.json();
-                    const transactions = await fetchTransactions();
-                    renderBudgets(budgets, transactions);
+                    const data = await response.json();
+                    renderBudgets(data);
                 } catch (error) {
                     console.error("Error fetching budgets:", error);
                 }
             }
 
-            async function fetchTransactions() {
-                try {
-                    const response = await fetch('tran_process.php', {
-                        method: 'GET'
-                    });
-                    return await response.json();
-                } catch (error) {
-                    console.error("Error fetching transactions:", error);
-                    return [];
-                }
-            }
-
-            function renderBudgets(budgets, transactions) {
+            function renderBudgets(budgets) {
                 budgetsList.innerHTML = '';
 
                 budgets.forEach(budget => {
-                    const spent = calculateSpent(budget, transactions);
-                    const progress = (spent / budget.BudgetAmt) * 100;
                     const budgetDiv = document.createElement('div');
-                    budgetDiv.classList.add('budget-item');
-                    
-                    const icon = getCategoryIcon(budget.BudgetCat);
+                    budgetDiv.classList.add('budget');
                     budgetDiv.innerHTML = `
-                        <div class="budget-icon">
-                            <i class="fas ${icon}"></i>
-                        </div>
-                        <div class="budget-details">
-                            <div class="budget-header">
-                                <h3>${budget.BudgetTitle}</h3>
-                                <div class="budget-actions">
-                                    <button onclick='editBudget(${JSON.stringify(budget)})' class="edit-btn">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </button>
-                                    <button onclick="deleteBudget(${budget.BudgetID})" class="delete-btn">
-                                        <i class="fas fa-trash"></i> Delete
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="budget-amounts">
-                                <span class="total-balance">Total Balance: RM${budget.BudgetAmt.toFixed(2)}</span>
-                                <span class="total-expense">Total Expense: RM${spent.toFixed(2)}</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress" style="width: ${progress}%"></div>
-                            </div>
-                            <div class="budget-status">
-                                ${progress.toFixed(0)}% of your budget used
-                            </div>
-                        </div>
+                        <p>${budget.BudgetTitle} - ${budget.BudgetCat} - RM${parseFloat(budget.BudgetAmt).toFixed(2)} - ${budget.BudgetStart} to ${budget.BudgetEnd}</p>
+                        <button onclick="deleteBudget(${budget.BudgetID})">Delete</button>
+                        <button onclick='editBudget(${JSON.stringify(budget)})'>Edit</button>
                     `;
                     budgetsList.appendChild(budgetDiv);
                 });
             }
 
-            function calculateSpent(budget, transactions) {
-                return transactions
-                    .filter(tran => tran.TranCat === budget.BudgetCat && tran.TranType === 'Expense')
-                    .reduce((total, tran) => total + parseFloat(tran.TranAmount), 0);
-            }
-
-            // Close modal when clicking X or outside
-            closeModal.addEventListener('click', () => {
-                budgetModal.style.display = 'none';
+            addBudgetBtn.addEventListener('click', () => {
+                budgetForm.reset();
+                document.getElementById('budget_id').value = '';
+                budgetModal.style.display = 'block';
             });
 
-            window.addEventListener('click', (event) => {
-                if (event.target === budgetModal) {
-                    budgetModal.style.display = 'none';
-                }
+            closeModal.addEventListener('click', () => {
+                budgetModal.style.display = 'none';
             });
 
             budgetForm.addEventListener('submit', async (e) => {
@@ -185,6 +128,8 @@ $user_id = $_SESSION['id']; // Use session user ID
                 submitted = true;
 
                 const formData = new FormData(budgetForm);
+                formData.append("action", "save");
+
                 try {
                     const response = await fetch('budgets_process.php', {
                         method: 'POST',
@@ -195,6 +140,9 @@ $user_id = $_SESSION['id']; // Use session user ID
                         budgetModal.style.display = 'none';
                         budgetForm.reset();
                         fetchBudgets();
+
+                        // Log the action of adding a budget
+                        logUserActivity(<?php echo $user_id; ?>, "<?php echo $username; ?>", "Added a budget", "Budget");
                     }
                 } catch (error) {
                     console.error("Error submitting budget:", error);
@@ -217,6 +165,9 @@ $user_id = $_SESSION['id']; // Use session user ID
                         const data = await response.json();
                         if (data.success) {
                             fetchBudgets();
+
+                            // Log the action of deleting a budget
+                            logUserActivity(<?php echo $user_id; ?>, "<?php echo $username; ?>", "Deleted a budget", "Budget");
                         }
                     } catch (error) {
                         console.error("Error deleting budget:", error);
@@ -232,6 +183,9 @@ $user_id = $_SESSION['id']; // Use session user ID
                 document.getElementById('budget-start').value = budget.BudgetStart.split(' ')[0];
                 document.getElementById('budget-end').value = budget.BudgetEnd.split(' ')[0];
                 budgetModal.style.display = 'block';
+
+                // Log the action of editing a budget
+                logUserActivity(<?php echo $user_id; ?>, "<?php echo $username; ?>", "Edited a budget", "Budget");
             };
 
             fetchBudgets();

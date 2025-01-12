@@ -574,19 +574,19 @@ header h1 {
 }
 
 /*Bills.php styles*/
-.container {
+.bills-page .bill-container {
     max-width: 800px;
     margin: 10px;
     padding: 40px;
 }
 
-.container h1 {
+.bills-page .bill-container h1 {
     margin-bottom: 20px;
     padding-bottom: 10px;
     border-bottom: 2px solid #ddd;
 }
 
-.bill-item {
+.bills-page .bill-item {
     background-color: #f9f9f9;
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -594,11 +594,11 @@ header h1 {
     padding: 15px;
 }
 
-.bill-item h4 {
+.bills-page .bill-item h4 {
     margin-bottom: 10px;
 }
 
-button {
+.bills-page .bill-button {
     background-color: #5F2D86;
     color: white;
     border: none;
@@ -609,11 +609,11 @@ button {
     margin-bottom: 20px;
 }
 
-button:hover {
+.bills-page .bill-button:hover {
     background-color: #4d2269;
 }
 
-.modal {
+.bills-page .modal {
     display: none;
     position: fixed;
     z-index: 1;
@@ -626,16 +626,15 @@ button:hover {
     align-items: center;
 }
 
-.modal-content {
+.bills-page .modal-content {
     background-color: white;
     padding: 20px;
     border-radius: 8px;
     width: 400px;
     text-align: center;
-    
 }
 
-.close {
+.bills-page .close {
     float: right;
     font-size: 24px;
     cursor: pointer;
@@ -1178,3 +1177,82 @@ canvas {
     }
 }
 
+manage_materials.php styles
+ body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+        .materials-container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+        }
+        .materials-container h2 {
+            margin-bottom: 20px;
+            color: #4a148c;
+        }
+        .material-item {
+            background-color: #fff;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .material-info {
+            margin-bottom: 10px;
+        }
+        .material-info h3 {
+            color: #4a148c;
+            margin-bottom: 10px;
+        }
+        .material-info p {
+            margin-bottom: 5px;
+            color: #1b1b1b;
+        }
+        .material-info .date {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .material-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .material-actions button {
+            background-color: #ffcc00;
+            color: #1b1b1b;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .material-actions button:hover {
+            background-color: #e6b800;
+        }
+        .add-material-btn {
+            background-color: #4a148c;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .add-material-btn:hover {
+            background-color: #3b0d6b;
+        }
+        .form-container, .edit-form-container {
+            display: none;
+            max-width: 600px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+       

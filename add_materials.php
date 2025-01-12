@@ -5,7 +5,6 @@ session_start();
 // Include config file
 require_once 'config.php';
 
-
 include 'admin_navbar.php';
 
 // Define variables and initialize with empty values
@@ -52,7 +51,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             // Attempt to execute the prepared statement
             if ($stmt->execute()) {
-                echo "Material added successfully.";
+                header("location: manage_materials.php?message=Material added successfully.");
+                exit;
             } else {
                 echo "Something went wrong. Please try again later.";
             }
@@ -125,28 +125,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .error {
             color: red;
             font-size: 0.9em;
-
-            
-            
         }
 
         .back-btn {
-    background-color: #4a148c;
-    color: #fff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    text-decoration: none; /* Remove underline from link */
-    display: inline-block; /* Ensure it behaves like a button */
-    margin-bottom: 20px; /* Add some space below the button */
-    margin-top: 30px;
-}
+            background-color: #4a148c;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none; /* Remove underline from link */
+            display: inline-block; /* Ensure it behaves like a button */
+            margin-bottom: 20px; /* Add some space below the button */
+            margin-top: 30px;
+        }
 
-.back-btn:hover {
-    background-color: #3b0d6b;
-}
+        .back-btn:hover {
+            background-color: #3b0d6b;
+        }
     </style>
 </head>
 <body>

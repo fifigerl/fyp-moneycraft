@@ -36,8 +36,10 @@ $conn->close();
 
 // Function to extract YouTube video ID
 function getYouTubeID($url) {
-    parse_str(parse_url($url, PHP_URL_QUERY), $query);
-    return $query['v'] ?? null;
+    if (preg_match('/(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]+)|(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/', $url, $matches)) {
+        return $matches[1] ?? $matches[2];
+    }
+    return null;
 }
 
 // Get message from URL if available
@@ -52,7 +54,7 @@ $message = isset($_GET['message']) ? $_GET['message'] : '';
     <title>Manage Uploaded Materials</title>
     <link rel="stylesheet" href="../css/navbar.css">
     <style>
-        body {
+    body {
             font-family: 'Arial', sans-serif;
             background-color: #f9f9f9;
             padding: 20px;
@@ -128,7 +130,7 @@ $message = isset($_GET['message']) ? $_GET['message'] : '';
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-    </style>
+        </style>
     <script>
         function editMaterial(id, title, content, link) {
             document.getElementById('edit_resource_id').value = id;
@@ -175,7 +177,12 @@ $message = isset($_GET['message']) ? $_GET['message'] : '';
         <?php else: ?>
             <?php foreach ($materials as $material): ?>
                 <div class="material-item">
-                    <iframe width="100%" height="300" src="https://www.youtube.com/embed/<?php echo getYouTubeID($material['ResourceLink']); ?>" frameborder="0" allowfullscreen></iframe>
+                    <?php $video_id = getYouTubeID($material['ResourceLink']); ?>
+                    <?php if ($video_id): ?>
+                        <iframe width="100%" height="300" src="https://www.youtube.com/embed/<?php echo $video_id; ?>" frameborder="0" allowfullscreen></iframe>
+                    <?php else: ?>
+                        <p>Invalid YouTube link.</p>
+                    <?php endif; ?>
                     <div class="material-info">
                         <h3><?php echo htmlspecialchars($material['ResourceTitle']); ?></h3>
                         <p class="date">Added <?php echo date('j F Y', strtotime($material['ContentDate'])); ?>.</p>

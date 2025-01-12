@@ -1,9 +1,14 @@
 <?php
-// Start the session
 session_start();
-
-// Include config file
 require_once '../config.php';
+
+// Include the logging function
+function logUserActivity($conn, $userId, $username, $action, $type = null) {
+    $stmt = $conn->prepare("INSERT INTO UserActivities (UserID, Username, Action, Type) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("isss", $userId, $username, $action, $type);
+    $stmt->execute();
+    $stmt->close();
+}
 
 // Check if the user is logged in, if not redirect to login page
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
@@ -11,20 +16,23 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     exit;
 }
 
-// Get the logged-in user's ID
-$user_id = $_SESSION['id']; // Use session user ID
+// Get the logged-in user's ID and username
+$user_id = $_SESSION['id'];
+$username = $_SESSION['username'];
+
+// Log the action of viewing the bills page
+logUserActivity($conn, $user_id, $username, "Viewed Bills Page", "View");
 
 include '../navbar.php';
-?>
-<!DOCTYPE html>
+?><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>My Bills</title>
     <link rel="stylesheet" href="../styles.css">
 </head>
-<body>
-    <div class="container">
+<body class="bills-page">
+    <div class="bill-container">
         <h1>My Bills</h1>
         <button id="add-bill-btn">+ Add Bill</button>
         <div id="bills-list"></div>
@@ -83,11 +91,15 @@ include '../navbar.php';
                 });
                 const data = await response.json();
                 alert(data.success || data.error);
-                fetchBills();
-                billModal.style.display = 'none';
+                if (data.success) {
+                    billModal.style.display = 'none';
+                    fetchBills();
+
+                    // Log the action of adding a bill
+                    logUserActivity(<?php echo $user_id; ?>, "<?php echo $username; ?>", "Added a bill", "Bill");
+                }
             };
 
-            // Fetch Bills from the Server
             async function fetchBills() {
                 const response = await fetch('bills_process.php', {
                     method: 'POST',
@@ -130,42 +142,35 @@ include '../navbar.php';
                     document.getElementById('bill-due').value = bill.BillDue;
                     document.getElementById('bill-frequency').value = bill.BillFrequency;
                     document.getElementById('bill-amount').value = bill.BillAmt;
-                    billForm.querySelector('input[name="action"]').value = 'update';
                     billModal.style.display = 'block';
-                } else {
-                    console.error('Bill not found for ID:', id);
-                    alert('Unable to find the bill. Please refresh the page.');
+
+                    // Log the action of editing a bill
+                    logUserActivity(<?php echo $user_id; ?>, "<?php echo $username; ?>", "Edited a bill", "Bill");
                 }
             };
 
             // Delete Bill
             window.deleteBill = async (id) => {
-                if (confirm('Are you sure you want to delete this bill reminder?')) {
+                if (confirm('Are you sure you want to delete this bill?')) {
+                    const formData = new FormData();
+                    formData.append('action', 'delete');
+                    formData.append('reminder_id', id);
+
                     const response = await fetch('bills_process.php', {
                         method: 'POST',
-                        body: new URLSearchParams({ action: 'delete', reminder_id: id })
+                        body: formData
                     });
                     const data = await response.json();
                     alert(data.success || data.error);
-                    fetchBills();
+                    if (data.success) {
+                        fetchBills();
+
+                        // Log the action of deleting a bill
+                        logUserActivity(<?php echo $user_id; ?>, "<?php echo $username; ?>", "Deleted a bill", "Bill");
+                    }
                 }
             };
 
-            // Toggle Paid Status
-            window.togglePaid = async (id) => {
-                const bill = bills.find(b => b.ReminderID == id);
-                if (bill) {
-                    const response = await fetch('bills_process.php', {
-                        method: 'POST',
-                        body: new URLSearchParams({ action: 'togglePaid', reminder_id: id, paid: !bill.Paid })
-                    });
-                    const data = await response.json();
-                    alert(data.success || data.error);
-                    fetchBills();
-                }
-            };
-
-            // Initial Fetch
             fetchBills();
         });
     </script>

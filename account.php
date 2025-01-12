@@ -7,6 +7,14 @@ include 'navbar.php';
 // Include config file
 require_once 'config.php';
 
+// Include the logging function
+function logUserActivity($conn, $userId, $username, $action, $type = null) {
+    $stmt = $conn->prepare("INSERT INTO UserActivities (UserID, Username, Action, Type) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("isss", $userId, $username, $action, $type);
+    $stmt->execute();
+    $stmt->close();
+}
+
 // Check if the user is logged in, if not redirect to login page
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     header("location: login.php");
@@ -39,9 +47,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $sql .= " WHERE UserID=$userId";
         $conn->query($sql);
+
+        // Log the action of updating account
+        logUserActivity($conn, $userId, $username, "Updated account", "Account");
     } elseif ($action === 'delete') {
         $sql = "DELETE FROM users WHERE UserID=$userId";
         $conn->query($sql);
+
+        // Log the action of deleting account
+        logUserActivity($conn, $userId, $username, "Deleted account", "Account");
+
         // Log the user out after account deletion
         session_destroy();
         header("location: login.php");

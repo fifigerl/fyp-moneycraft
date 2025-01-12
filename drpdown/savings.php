@@ -3,13 +3,25 @@ session_start();
 include '../config.php';
 include '../navbar.php'; 
 
+// Include the logging function
+function logUserActivity($conn, $userId, $username, $action, $type = null) {
+    $stmt = $conn->prepare("INSERT INTO UserActivities (UserID, Username, Action, Type) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("isss", $userId, $username, $action, $type);
+    $stmt->execute();
+    $stmt->close();
+}
+
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     header("location: ../login.php");
     exit;
 }
 
-// Get the logged-in user's ID
-$user_id = $_SESSION['id']; // Use session user ID
+// Get the logged-in user's ID and username
+$user_id = $_SESSION['id'];
+$username = $_SESSION['username'];
+
+// Log the action of viewing the savings goals page
+logUserActivity($conn, $user_id, $username, "Viewed Savings Goals Page", "View");
 
 // Fetch savings goals for the logged-in user
 $savingsGoals = $conn->query("SELECT * FROM Savings WHERE UserID = $user_id");
@@ -93,6 +105,9 @@ $savingsGoals = $conn->query("SELECT * FROM Savings WHERE UserID = $user_id");
                 if (data.success) {
                     goalModal.style.display = 'none';
                     location.reload(); // Refresh to show new entry
+
+                    // Log the action of adding a savings goal
+                    logUserActivity(<?php echo $user_id; ?>, "<?php echo $username; ?>", "Added a savings goal", "Savings");
                 }
             };
 
@@ -107,6 +122,9 @@ $savingsGoals = $conn->query("SELECT * FROM Savings WHERE UserID = $user_id");
                             document.querySelector('input[name="TargetDate"]').value = data.TargetDate;
                             goalForm.querySelector('input[name="action"]').value = 'edit';
                             goalModal.style.display = 'block';
+
+                            // Log the action of editing a savings goal
+                            logUserActivity(<?php echo $user_id; ?>, "<?php echo $username; ?>", "Edited a savings goal", "Savings");
                         }
                     });
             };
@@ -119,6 +137,9 @@ $savingsGoals = $conn->query("SELECT * FROM Savings WHERE UserID = $user_id");
                             alert(data.success ? "Savings goal deleted successfully!" : `Error: ${data.error}`);
                             if (data.success) {
                                 location.reload();
+
+                                // Log the action of deleting a savings goal
+                                logUserActivity(<?php echo $user_id; ?>, "<?php echo $username; ?>", "Deleted a savings goal", "Savings");
                             }
                         });
                 }

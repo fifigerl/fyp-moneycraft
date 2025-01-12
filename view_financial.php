@@ -23,8 +23,10 @@ $conn->close();
 
 // Function to extract YouTube video ID
 function getYouTubeID($url) {
-    parse_str(parse_url($url, PHP_URL_QUERY), $query);
-    return $query['v'] ?? null;
+    if (preg_match('/(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]+)|(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/', $url, $matches)) {
+        return $matches[1] ?? $matches[2];
+    }
+    return null;
 }
 
 $video_id = $resource ? getYouTubeID($resource['ResourceLink']) : null;
@@ -63,12 +65,6 @@ $video_id = $resource ? getYouTubeID($resource['ResourceLink']) : null;
             font-size: 0.9em;
             color: #666;
         }
-        .resource-details img {
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
     </style>
 </head>
 <body>
@@ -79,9 +75,9 @@ $video_id = $resource ? getYouTubeID($resource['ResourceLink']) : null;
             <p class="date">Added <?php echo date('j F Y', strtotime($resource['ContentDate'])); ?>.</p>
             <p>Source: Youtube. Retrieved From <?php echo htmlspecialchars($resource['ResourceLink']); ?></p>
             <?php if ($video_id): ?>
-                <a href="<?php echo htmlspecialchars($resource['ResourceLink']); ?>" target="_blank">
-                    <img src="https://img.youtube.com/vi/<?php echo $video_id; ?>/0.jpg" alt="Video Thumbnail">
-                </a>
+                <iframe width="100%" height="300" src="https://www.youtube.com/embed/<?php echo $video_id; ?>" frameborder="0" allowfullscreen></iframe>
+            <?php else: ?>
+                <p>Invalid YouTube link.</p>
             <?php endif; ?>
             <h3>Understanding <?php echo htmlspecialchars($resource['ResourceTitle']); ?></h3>
             <p><?php echo nl2br(htmlspecialchars($resource['ResourceCont'])); ?></p>

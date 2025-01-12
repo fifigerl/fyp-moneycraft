@@ -13,6 +13,14 @@ if ($result = $conn->query($sql)) {
 }
 
 $conn->close();
+
+// Function to extract YouTube video ID
+function getYouTubeID($url) {
+    if (preg_match('/(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]+)|(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/', $url, $matches)) {
+        return $matches[1] ?? $matches[2];
+    }
+    return null;
+}
 ?>
 
 <!DOCTYPE html>
@@ -23,19 +31,19 @@ $conn->close();
     <title>Financial Education Resources</title>
     <link rel="stylesheet" href="navbar.css">
     <link rel="stylesheet" href="styles.css">
-           
 </head>
 <body>
     <?php include 'navbar.php'; ?>
     <div class="resources-container">
         <h2>Financial Education Resources</h2>
-        <?php foreach ($resources as $index => $resource): ?>
-            <?php 
-            // Hardcoded video IDs
-            $video_id = $index === 0 ? 'MXCvtC0HqLE' : 'bEElvs_5byk'; 
-            ?>
+        <?php foreach ($resources as $resource): ?>
+            <?php $video_id = getYouTubeID($resource['ResourceLink']); ?>
             <div class="resource-item">
-                <iframe src="https://www.youtube.com/embed/<?php echo $video_id; ?>" frameborder="0" allowfullscreen></iframe>
+                <?php if ($video_id): ?>
+                    <iframe width="100%" height="300" src="https://www.youtube.com/embed/<?php echo $video_id; ?>" frameborder="0" allowfullscreen></iframe>
+                <?php else: ?>
+                    <p>Invalid YouTube link.</p>
+                <?php endif; ?>
                 <div class="resource-info">
                     <h3><?php echo htmlspecialchars($resource['ResourceTitle']); ?></h3>
                     <p class="date">Added <?php echo date('j F Y', strtotime($resource['ContentDate'])); ?>.</p>

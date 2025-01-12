@@ -5,14 +5,28 @@ session_start();
 // Include config file
 require_once '../config.php';
 
+// Include the logging function
+function logUserActivity($conn, $userId, $username, $action, $type = null) {
+    $stmt = $conn->prepare("INSERT INTO UserActivities (UserID, Username, Action, Type) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("isss", $userId, $username, $action, $type);
+    $stmt->execute();
+    $stmt->close();
+}
+
 // Check if the user is logged in
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     header("location: ../login.php");
     exit;
 }
 
-// Fetch the username and profile picture
+// Get the logged-in user's ID and username
 $user_id = $_SESSION['id'];
+$username = $_SESSION['username'];
+
+// Log the action of viewing the feedbacks page
+logUserActivity($conn, $user_id, $username, "Viewed Feedbacks Page", "View");
+
+// Fetch the username and profile picture
 $sql_user = "SELECT Username, ProfilePicture FROM Users WHERE UserID = ?";
 $stmt_user = $conn->prepare($sql_user);
 $stmt_user->bind_param("i", $user_id);
@@ -50,8 +64,6 @@ $resources = $conn->query($sql_resources);
     <?php include '../navbar.php'; ?>
     <div class="feedbacks-container">
         <div class="profile-section">
-      
-        
             <h3><?php echo htmlspecialchars($username); ?></h3>
             <p>3 Feedbacks Published</p>
         </div>
@@ -95,7 +107,7 @@ $resources = $conn->query($sql_resources);
     <div id="feedbackModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal()">&times;</span>
-            <h3 id="modalTitle">Add New Feedback</h3>
+            <h2 id="modalTitle">Add New Feedback</h2>
             <form id="feedbackForm" class="feedback-form" action="feedbacks_process.php" method="POST">
                 <input type="hidden" id="feedbackId" name="feedback_id">
                 <div class="input-group">
@@ -147,6 +159,9 @@ $resources = $conn->query($sql_resources);
                     document.getElementById('feedback_content').value = data.FeedbackContent;
                     document.querySelector(`input[name="feedback_rating"][value="${data.FeedbackRating}"]`).checked = true;
                     modal.style.display = 'block';
+
+                    // Log the action of editing feedback
+                    logUserActivity(<?php echo $user_id; ?>, "<?php echo $username; ?>", "Edited feedback", "Feedback");
                 });
         }
 
@@ -161,6 +176,9 @@ $resources = $conn->query($sql_resources);
                     .then(data => {
                         if (data.success) {
                             location.reload();
+
+                            // Log the action of deleting feedback
+                            logUserActivity(<?php echo $user_id; ?>, "<?php echo $username; ?>", "Deleted feedback", "Feedback");
                         } else {
                             alert('Failed to delete feedback.');
                         }

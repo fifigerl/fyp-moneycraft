@@ -1,19 +1,31 @@
 <?php
 session_start();
-include '../config.php';
-include '../navbar.php'; 
+require_once '../config.php';
 
+// Include the logging function
+function logUserActivity($conn, $userId, $username, $action, $type = null) {
+    $stmt = $conn->prepare("INSERT INTO UserActivities (UserID, Username, Action, Type) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("isss", $userId, $username, $action, $type);
+    $stmt->execute();
+    $stmt->close();
+}
+
+// Check if the user is logged in
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     header("location: ../login.php");
     exit;
 }
 
-// Get the logged-in user's ID
-$user_id = $_SESSION['id']; // Use session user ID
+// Get the logged-in user's ID and username
+$user_id = $_SESSION['id'];
+$username = $_SESSION['username'];
 
+// Log the action of viewing the transactions page
+logUserActivity($conn, $user_id, $username, "Viewed Transactions Page", "View");
 
-
+include '../navbar.php'; 
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,7 +49,6 @@ $user_id = $_SESSION['id']; // Use session user ID
             <button id="add-transaction">+ Add Transaction</button>
             <div id="transactions-list"></div>
         </section>
-
     </div>
 
     <div id="transaction-modal" class="modal">
@@ -171,6 +182,9 @@ $user_id = $_SESSION['id']; // Use session user ID
                         transactionModal.style.display = 'none';
                         transactionForm.reset();
                         fetchTransactions();
+
+                        // Log the action of adding a transaction
+                        logUserActivity(<?php echo $user_id; ?>, "<?php echo $username; ?>", "Added a transaction", "Transaction");
                     }
                 } catch (error) {
                     console.error("Error submitting transaction:", error);
@@ -193,6 +207,9 @@ $user_id = $_SESSION['id']; // Use session user ID
                         const data = await response.json();
                         alert(data.success || data.error);
                         fetchTransactions();
+
+                        // Log the action of deleting a transaction
+                        logUserActivity(<?php echo $user_id; ?>, "<?php echo $username; ?>", "Deleted a transaction", "Transaction");
                     } catch (error) {
                         console.error("Error deleting transaction:", error);
                     }
@@ -207,6 +224,9 @@ $user_id = $_SESSION['id']; // Use session user ID
                 document.getElementById('tran_amount').value = tran.TranAmount;
                 document.getElementById('tran_date').value = tran.TranDate;
                 transactionModal.style.display = 'block';
+
+                // Log the action of editing a transaction
+                logUserActivity(<?php echo $user_id; ?>, "<?php echo $username; ?>", "Edited a transaction", "Transaction");
             };
 
             fetchTransactions();
