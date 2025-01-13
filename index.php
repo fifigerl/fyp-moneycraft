@@ -1,4 +1,4 @@
-<?php
+<?php 
 // Initialize the session
 session_start();
 
@@ -13,6 +13,15 @@ require_once 'config.php';
 
 // Get the logged-in user's ID
 $user_id = $_SESSION['id'];
+
+// Fetch the logged-in user's username
+$sql = "SELECT Username FROM Users WHERE UserID = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$users = $result->fetch_assoc();
+$username = $users['Username'] ?? 'User'; // Default to 'User' if username is not found
 
 // Fetch total income, expenses, and current balance
 $sql = "SELECT 
@@ -80,7 +89,26 @@ while ($budget = $budgets->fetch_assoc()) {
     $budget_labels[] = $budget['BudgetCat'];
     $budget_data[] = $budget['total_budget'];
 }
+
+
+// Fetch latest financial education video
+$sql = "SELECT ResourceTitle, ResourceLink 
+        FROM FinancialEducationResources
+        ORDER BY ContentDate DESC
+        LIMIT 1";
+$latest_resource = $conn->query($sql)->fetch_assoc();
+
+// Extract YouTube video ID
+function getYouTubeID($url) {
+    if (preg_match('/(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]+)|(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/', $url, $matches)) {
+        return $matches[1] ?? $matches[2];
+    }
+    return null;
+}
+
+$latest_video_id = getYouTubeID($latest_resource['ResourceLink'] ?? '');
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -98,8 +126,35 @@ while ($budget = $budgets->fetch_assoc()) {
 <body class="bg-light">
     <?php include 'navbar.php'; ?>
 
+    <!-- Welcome back message -->
     <div class="container mt-4">
+        <h1 class="text-left">Welcome back, <?php echo htmlspecialchars($username); ?>!</h1>
         <div class="row">
+
+       <!-- Watch the Latest Financial Education Video Section -->
+<div class="row justify-content-center mb-4">
+    <div class="col-md-8">
+        <div class="card shadow-sm" style="border-radius: 15px;">
+            <div class="card-body text-center">
+                <h4 class="card-title">Watch the Latest Financial Education Video!</h4>
+                <?php if ($latest_video_id): ?>
+                    <div style="position: relative; padding-bottom: 51%; height: 0; overflow: hidden; border-radius: 15px;">
+                        <iframe 
+                            src="https://www.youtube.com/embed/<?php echo $latest_video_id; ?>" 
+                            frameborder="0" 
+                            allowfullscreen 
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 15px;">
+                        </iframe>
+                    </div>
+                    <h5 class="mt-3"><?php echo htmlspecialchars($latest_resource['ResourceTitle']); ?></h5>
+                <?php else: ?>
+                    <p>No videos available at the moment.</p>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
             <!-- Current Balance -->
             <div class="col-md-4 mb-4">
                 <div class="card bg-primary text-white">
