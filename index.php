@@ -150,38 +150,44 @@ $latest_video_id = getYouTubeID($latest_resource['ResourceLink'] ?? '');
     <!--Modern Font-->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-       body {
+      body {
     background-color: #C5C5C5; /* Set the page background color */
     color: #161925;
     font-family: 'Inter', sans-serif;
 }
 
-        .card.current-balance-card {
-            background-color: black;
-            color: white;
-            border-radius: 20px;
-            border: none;
-        }
+h1.text-left {
+    font-weight: 900; /* Make it bold */
+    color: rgb(0, 35, 72); /* Keep your custom color */
+}
 
-        .card:not(.current-balance-card) {
-            background-color: #FFFFFF;
-            color: #161925;
-            border-radius: 20px;
-            border: none;
-        }
 
-        .btn-primary {
-            background-color: #FFD000;
-            border: none;
-            color: #161925;
-        }
+.card.current-balance-card {
+    background-color: black;
+    color: white;
+    border-radius: 20px;
+    border: none;
+}
 
-        .btn-primary:hover {
-            background-color: #FDF09D;
-            color: #161925;
-        }
+.card:not(.current-balance-card) {
+    background-color: #FFFFFF;
+    color: #161925;
+    border-radius: 20px;
+    border: none;
+}
 
-        .circular-progress-container {
+.btn-primary {
+    background-color: #FFD000;
+    border: none;
+    color: #161925;
+}
+
+.btn-primary:hover {
+    background-color: #FDF09D;
+    color: #161925;
+}
+
+.circular-progress-container {
     position: relative;
     width: 100px;
     height: 100px;
@@ -205,6 +211,74 @@ $latest_video_id = getYouTubeID($latest_resource['ResourceLink'] ?? '');
     color: #161925;
 }
 
+/* New Styles for the bottom section (Savings Goal & Financial Education Video) */
+.row.savings-video-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.card.savings-goal-card,
+.card.video-card {
+    border-radius: 20px;
+    background-color: #FFFFFF;
+    color: #161925;
+    flex: 1;
+}
+
+.card.savings-goal-card {
+    /* Ensure it stays the same size */
+    max-width: 48%;
+}
+
+.card.video-card {
+    /* Make this card smaller */
+    max-width: 48%;
+}
+
+.card-title {
+    font-weight: bold;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* Optional: Adjust the video iframe to fit the card */
+.card.video-card iframe {
+    border-radius: 20px;
+    width: 100%;
+    height: 200px;
+}
+
+.card-body h5 {
+    font-size: 1.1rem;
+    margin-top: 10px;
+    color: rgb(0, 12, 12);
+}
+
+.card-body p {
+    font-size: 1rem;
+}
+
+/* Responsive: Make sure layout adapts well on smaller screens */
+@media (max-width: 768px) {
+    .row.savings-video-row {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .card.savings-goal-card,
+    .card.video-card {
+        max-width: 100%;
+    }
+
+    .card.video-card iframe {
+        height: 180px; /* Adjust the iframe height for small screens */
+    }
+}
+
         
     </style>
 
@@ -214,7 +288,7 @@ $latest_video_id = getYouTubeID($latest_resource['ResourceLink'] ?? '');
 
   <!-- Welcome back message -->
 <div class="container mt-2"> 
-    <h1 class="text-left" style="margin-top: 10px; color:rgb(0, 35, 72);">Welcome back, <?php echo htmlspecialchars($username); ?>!</h1>
+    <h1 class="text-left" style="margin-top: 10px; color:rgb(0, 35, 72);">👋 Welcome back, <?php echo htmlspecialchars($username); ?>!</h1>
 
     <div class="row">
             <!-- Cash Flow Chart -->
@@ -337,84 +411,95 @@ $latest_video_id = getYouTubeID($latest_resource['ResourceLink'] ?? '');
     </div>
 </div>
 
-
-<div class="row">
-        <!-- Watch the Latest Financial Education Video Section -->
-        <div class="row justify-content-center mb-4" style="margin-top: 10px;">
-            <div class="col-md-8">
-                <div class="card" style="border-radius: 20px; background-color:#FFFFFF; color: #FFFFFF;">
-                    <div class="card-body text-center">
-                        <h4 class="card-title" style="color:rgb(0, 0, 0);"  >Watch the Latest Financial Education Video!</h4>
-                        <?php if ($latest_video_id): ?>
-                            <div style="position: relative; padding-bottom: 51%; height: 0; overflow: hidden; border-radius: 20px;">
-                                <iframe 
-                                    src="https://www.youtube.com/embed/<?php echo $latest_video_id; ?>" 
-                                    frameborder="0" 
-                                    allowfullscreen 
-                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 20px;">
-                                </iframe>
-                            </div>
-                            <h5 class="mt-3" style="color:rgb(0, 12, 12);"><?php echo htmlspecialchars($latest_resource['ResourceTitle']); ?></h5>
-                        <?php else: ?>
-                            <p style="color: #dc3545;">No videos available at the moment.</p>
-                        <?php endif; ?>
+<div class="row justify-content-center mb-4" style="margin-top: 10px;">
+    <!-- Financial Education Video Card -->
+    <div class="col-md-6">
+        <div class="card" style="border-radius: 20px; background-color:#FFFFFF; color: #FFFFFF;">
+            <div class="card-body text-center">
+                <h4 class="card-title" style="color:rgb(0, 0, 0); font-size: 18px;">🔔 Watch the Latest Financial Education Video!</h4>
+                <?php if ($latest_video_id): ?>
+                    <div style="position: relative; padding-bottom: 51%; height: 0; overflow: hidden; border-radius: 20px;">
+                        <iframe 
+                            src="https://www.youtube.com/embed/<?php echo $latest_video_id; ?>" 
+                            frameborder="0" 
+                            allowfullscreen 
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 20px;">
+                        </iframe>
                     </div>
-                </div>
-            </div>
-        </div>
- <!-- Savings Goals -->
-<div class="col-md-4 mb-2">
-    <div class="card" style="border-radius: 20px; background-color:#FFFFFF; color: #161925;">
-        <div class="card-body">
-            <h4 class="card-title">Savings Goals</h4>
-            <div class="row">
-                <?php 
-                // Fetch savings goals for the logged-in user
-                $sql = "SELECT SavingsTitle, SavingsAmt, CurrentSavings, TargetDate 
-                        FROM Savings 
-                        WHERE UserID = ?";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("i", $user_id);
-                $stmt->execute();
-                $savings_goals = $stmt->get_result();
-
-                if ($savings_goals->num_rows > 0):
-                    while ($savings = $savings_goals->fetch_assoc()): 
-                ?>
-                <div class="col-md-12 mb-3">
-                    <div class="d-flex align-items-center">
-                        <div style="flex: 1;">
-                            <h5 style="margin: 0;"><?php echo htmlspecialchars($savings['SavingsTitle']); ?></h5>
-                            <p style="margin: 0;">Target: RM<?php echo number_format($savings['SavingsAmt'], 2); ?></p>
-                            <p style="margin: 0;">Saved: RM<?php echo number_format($savings['CurrentSavings'], 2); ?></p>
-                            <p style="margin: 0;">Target Date: <?php echo htmlspecialchars($savings['TargetDate']); ?></p>
-                        </div>
-
-                        <!-- Circular Progress Bar -->
-                        <div style="flex-basis: 150px; text-align: center;">
-                            <!-- Circular progress bar using CSS -->
-                            <div class="circular-progress-container">
-                                <svg width="100" height="100">
-                                    <circle cx="50" cy="50" r="45" stroke="#e6e6e6" stroke-width="10" fill="none" />
-                                    <circle cx="50" cy="50" r="45" stroke="#FFD000" stroke-width="10" fill="none" 
-                                            stroke-dasharray="<?php echo ($savings['CurrentSavings'] / $savings['SavingsAmt']) * 282; ?>" 
-                                            stroke-dashoffset="0" style="transition: stroke-dasharray 0.5s ease;"></circle>
-                                </svg>
-                                <p><?php echo round(($savings['CurrentSavings'] / $savings['SavingsAmt']) * 100, 2); ?>%</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <?php 
-                    endwhile;
-                else: 
-                ?>
-                <p>No savings goals added yet.</p>
+                    <!-- Button with arrow to go to the resource -->
+                    <a href="<?php echo $latest_resource['ResourceLink']; ?>" 
+                       target="_blank" 
+                       class="btn btn-primary mt-3" 
+                       style="background-color: #FFD000; color: #161925; font-weight: bold; border-radius: 15px;">
+                        <i class="fas fa-arrow-right" style="margin-right: 10px;"></i> 
+                        Go to <?php echo htmlspecialchars($latest_resource['ResourceTitle']); ?>
+                    </a>
+                <?php else: ?>
+                    <p style="color: #dc3545;">No videos available at the moment.</p>
                 <?php endif; ?>
             </div>
         </div>
     </div>
+
+    <!-- Savings Goals Card -->
+    <div class="col-md-6">
+        <div class="card" style="border-radius: 20px; background-color:#FFFFFF; color: #161925;">
+            <div class="card-body">
+                <h4 class="card-title" style="font-size: 18px;">
+                    <i class="fas fa-dart" style="color: #FFD000; margin-right: 10px;"></i>
+                    Savings Goals
+                </h4>
+                <div class="row">
+                    <?php 
+                    // Fetch savings goals for the logged-in user
+                    $sql = "SELECT SavingsTitle, SavingsAmt, CurrentSavings, TargetDate 
+                            FROM Savings 
+                            WHERE UserID = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("i", $user_id);
+                    $stmt->execute();
+                    $savings_goals = $stmt->get_result();
+
+                    if ($savings_goals->num_rows > 0):
+                        while ($savings = $savings_goals->fetch_assoc()): 
+                    ?>
+                    <div class="col-md-12 mb-3">
+                        <div class="d-flex align-items-center">
+                            <div style="flex: 1;">
+                                <h5 style="margin: 0;"><?php echo htmlspecialchars($savings['SavingsTitle']); ?></h5>
+                                <p style="margin: 0;">Target: RM<?php echo number_format($savings['SavingsAmt'], 2); ?></p>
+                                <p style="margin: 0;">Saved: RM<?php echo number_format($savings['CurrentSavings'], 2); ?></p>
+                                <p style="margin: 0;">Target Date: <?php echo htmlspecialchars($savings['TargetDate']); ?></p>
+                            </div>
+
+                            <!-- Circular Progress Bar -->
+                            <div style="flex-basis: 150px; text-align: center;">
+                                <!-- Circular progress bar using CSS -->
+                                <div class="circular-progress-container">
+                                    <svg width="100" height="100">
+                                        <circle cx="50" cy="50" r="45" stroke="#e6e6e6" stroke-width="10" fill="none" />
+                                        <circle cx="50" cy="50" r="45" stroke="#FFD000" stroke-width="10" fill="none" 
+                                                stroke-dasharray="<?php echo ($savings['CurrentSavings'] / $savings['SavingsAmt']) * 282; ?>" 
+                                                stroke-dashoffset="0" style="transition: stroke-dasharray 0.5s ease;"></circle>
+                                    </svg>
+                                    <p><?php echo round(($savings['CurrentSavings'] / $savings['SavingsAmt']) * 100, 2); ?>%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php 
+                        endwhile;
+                    else: 
+                    ?>
+                    <p>No savings goals added yet.</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+``
+
 
 
     <!-- Bootstrap JS -->
