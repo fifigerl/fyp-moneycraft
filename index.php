@@ -1,6 +1,7 @@
 <?php 
 // Initialize the session
 session_start();
+include 'navbar.php'; 
 
 // Check if the user is logged in, if not then redirect them to login page
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
@@ -132,6 +133,8 @@ function getYouTubeID($url) {
 }
 
 $latest_video_id = getYouTubeID($latest_resource['ResourceLink'] ?? '');
+
+
 ?>
 
 
@@ -149,9 +152,12 @@ $latest_video_id = getYouTubeID($latest_resource['ResourceLink'] ?? '');
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <!--Modern Font-->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-      body {
-    background-color: #C5C5C5; /* Set the page background color */
+   
+   <style>
+    
+/*index.php style*/ 
+body {
+    background-color: #f8f9fa; /* Set the page background color */
     color: #161925;
     font-family: 'Inter', sans-serif;
 }
@@ -279,12 +285,13 @@ h1.text-left {
     }
 }
 
-        
-    </style>
+        </style>
+
+   
 
 </head>
-<body class="bg-light">
-    <?php include 'navbar.php'; ?>
+<body>
+   
 
   <!-- Welcome back message -->
 <div class="container mt-2"> 

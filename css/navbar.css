@@ -1,43 +1,35 @@
-/* NAVBAR STYLES */
+/* General Reset */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* Navbar container */
+/* Navbar Container */
 .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: white;
-    padding: 8px 20px;
-    font-family: 'Arial', sans-serif;
-    border-bottom: 1px solid #e0e0e0;
-    position: fixed;
+    background-color: rgb(255, 254, 241); /* Background color */
+    padding: 10px 40px;
+    font-family: 'Inter', sans-serif;
     width: 100%;
-    top: 0;
     z-index: 1000;
-    pointer-events: auto; /* Allow interaction */
+    
 }
 
-/* Logo and brand name styling */
-.logo {
-    display: flex;
-    align-items: center;
-}
-
+/* Logo Section */
 .logo img {
-    width: 150px;
+    width: 120px;
     height: auto;
-    margin-right: 10px;
 }
 
-/* Navbar links */
+/* Navigation Links */
 .nav-links {
     list-style: none;
     display: flex;
-    gap: 20px;
+    gap: 30px;
+    align-items: center;
 }
 
 .nav-links a {
@@ -52,7 +44,24 @@
     color: #0077b6;
 }
 
-/* Dropdown menu */
+/* Active Link */
+.nav-links a.active::after {
+    content: '';
+    display: block;
+    width: 5px;
+    height: 5px;
+    background-color: #f25f4c;
+    border-radius: 50%;
+    margin: auto;
+    margin-top: 5px;
+}
+
+/* Exclude dropdown parent from showing the dot */
+.dropdown .dropbtn.active::after {
+    content: none;
+}
+
+/* Dropdown Styling */
 .dropdown {
     position: relative;
 }
@@ -60,10 +69,12 @@
 .dropdown-content {
     display: none;
     position: absolute;
-    background-color: white;
+    background-color: #fff;
     min-width: 160px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
     z-index: 1;
+    border-radius: 5px;
+    overflow: hidden;
 }
 
 .dropdown-content a {
@@ -71,18 +82,59 @@
     display: block;
     color: #1b1b1b;
     text-decoration: none;
+    transition: background-color 0.3s;
 }
 
 .dropdown-content a:hover {
     background-color: #f0f0f0;
 }
 
-/* Show dropdown on hover */
+/* Show Dropdown on Hover */
 .dropdown:hover .dropdown-content {
     display: block;
 }
 
-/* Mobile-friendly styling */
+/* User Info Section */
+.navbar-end {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.profile i {
+    color: #FFD000;
+    font-size: 20px;
+}
+
+.profile span {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1b1b1b;
+}
+
+.button {
+    background-color: #1b1b1b;
+    color: #fff;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.button:hover {
+    background-color: #3b3b3b;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
     .navbar {
         flex-direction: column;
@@ -93,12 +145,10 @@
         flex-direction: column;
         gap: 10px;
     }
-}
 
-/* Ensure content is not blocked by navbar */
-body, html {
-    height: 100%;
-    overflow-x: hidden;
-    padding-top: 60px; /* Adjusted to match the navbar height */
-    overflow-y: auto;
+    .navbar-end {
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 10px;
+    }
 }
