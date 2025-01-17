@@ -43,14 +43,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     exit();
 } elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $sql = "SELECT * FROM Transactions WHERE UserID = ?";
+    // Example filter logic
+    $dateFilter = isset($_GET['date']) ? $_GET['date'] : null;
+
+    $sql = "SELECT TranID, TranTitle, TranType, TranAmount, TranDate FROM Transactions WHERE UserID = ?";
+    if ($dateFilter) {
+        $sql .= " AND DATE(TranDate) = ?";
+    }
+    $sql .= " ORDER BY TranDate DESC";
+
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $userId);
+    if ($dateFilter) {
+        $stmt->bind_param("is", $userId, $dateFilter);
+    } else {
+        $stmt->bind_param("i", $userId);
+    }
     $stmt->execute();
     $result = $stmt->get_result();
-    $transactions = $result->fetch_all(MYSQLI_ASSOC);
+
+    $transactions = [];
+    while ($row = $result->fetch_assoc()) {
+        $transactions[] = $row;
+    }
     echo json_encode($transactions);
     $stmt->close();
     exit();
 }
+
 ?>

@@ -446,7 +446,7 @@ h1.text-left {
         <div class="card" style="border-radius: 20px; background-color:#FFFFFF; color: #161925;">
             <div class="card-body">
                 <h4 class="card-title" style="font-size: 18px;">
-                    <i class="fas fa-dart" style="color: #FFD000; margin-right: 10px;"></i>
+                    <i class="fas fa-bullseye" style="color: #FFD000; margin-right: 10px;"></i>
                     Savings Goals
                 </h4>
                 <div class="row">
