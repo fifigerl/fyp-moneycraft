@@ -71,17 +71,14 @@ include '../navbar.php';
         }
 
         .bill-item {
+            position: relative; /* Ensure elements can be positioned within the card */
             background-color: #FFF;
             border: 1px solid #e9ecef;
             border-radius: 10px;
             padding: 15px;
             margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-
         .bill-details h4 {
             font-weight: bold;
             color: rgb(0, 35, 72);
@@ -172,6 +169,61 @@ include '../navbar.php';
         .modal-content button:hover {
             background-color: #FDF09D;
         }
+        .custom-checkbox {
+    position: absolute; /* Position relative to the bill card */
+    bottom: 10px; /* Adjust distance from the bottom */
+    right: 10px; /* Adjust distance from the right */
+    display: inline-flex; /* For better alignment */
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: #161925;
+    cursor: pointer;
+    user-select: none;
+}
+
+.custom-checkbox input[type="checkbox"] {
+    display: none; /* Hide the default checkbox */
+}
+
+.custom-checkbox .checkmark {
+    height: 30px;
+    width: 30px;
+    background-color: #fff;
+    border: 2px solid #FFD000;
+    border-radius: 8px; /* Rounded square edges */
+    margin-right: 8px;
+    transition: all 0.3s ease-in-out;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.custom-checkbox:hover .checkmark {
+    background-color: #FFE680;
+}
+
+.custom-checkbox input[type="checkbox"]:checked + .checkmark {
+    background-color: #FFD000; /* Yellow color */
+    border-color: #FFD000;
+}
+
+.custom-checkbox .checkmark:after {
+    content: '';
+    display: none;
+    width: 8px;
+    height: 14px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+}
+
+.custom-checkbox input[type="checkbox"]:checked + .checkmark:after {
+    display: block;
+}
+</style>
+
+        
     </style>
 </head>
 <body>
@@ -251,39 +303,45 @@ include '../navbar.php';
             renderBills(bills);
         }
 
-        // Render Bills List
         function renderBills(bills) {
-            billsList.innerHTML = '';
-            const today = new Date();
+    billsList.innerHTML = '';
+    const today = new Date();
 
-            bills.forEach(bill => {
-                const billDueDate = new Date(bill.BillDue);
-                const timeDiff = billDueDate - today; // Time difference in milliseconds
-                const daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24)); // Convert to days
-                const isOverdue = timeDiff < 0;
+    bills.forEach(bill => {
+        const billDueDate = new Date(bill.BillDue);
+        const timeDiff = billDueDate - today; // Time difference in milliseconds
+        const daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24)); // Convert to days
+        const isOverdue = timeDiff < 0;
 
-                const billItem = document.createElement('div');
-                billItem.className = 'bill-item';
-                billItem.innerHTML = `
-                    <div class="bill-details">
-                        <h4>${bill.BillTitle}</h4>
-                        <p>Amount: RM${bill.BillAmt}</p>
-                        <p>Due: ${bill.BillDue}</p>
-                        <p>Frequency: ${bill.BillFrequency}</p>
-                        <p>
-                            <span style="color: ${isOverdue ? 'red' : 'green'}; font-weight: bold;">
-                                ${isOverdue ? `Overdue by ${Math.abs(daysLeft)} day(s)` : `${daysLeft} day(s) left`}
-                            </span>
-                        </p>
-                    </div>
-                    <div class="bill-actions">
-                        <button onclick="editBill(${bill.ReminderID})">Edit</button>
-                        <button class="delete-button" onclick="deleteBill(${bill.ReminderID})">Delete</button>
-                    </div>
-                `;
-                billsList.appendChild(billItem);
-            });
-        }
+        const billItem = document.createElement('div');
+        billItem.className = 'bill-item';
+        billItem.innerHTML = `
+    <div class="bill-details">
+        <h4>${bill.BillTitle}</h4>
+        <p>Amount: RM${bill.BillAmt}</p>
+        <p>Due: ${bill.BillDue}</p>
+        <p>Frequency: ${bill.BillFrequency}</p>
+        <p>
+            <span style="color: ${isOverdue ? 'red' : 'green'}; font-weight: bold;">
+                ${isOverdue ? `Overdue by ${Math.abs(daysLeft)} day(s)` : `${daysLeft} day(s) left`}
+            </span>
+        </p>
+    </div>
+    <div class="bill-actions">
+        <button onclick="editBill(${bill.ReminderID})">Edit</button>
+        <button class="delete-button" onclick="deleteBill(${bill.ReminderID})">Delete</button>
+    </div>
+    <label class="custom-checkbox">
+        <input type="checkbox" ${bill.Paid ? 'checked' : ''} onclick="markAsPaid(${bill.ReminderID}, this.checked)">
+        <span class="checkmark"></span>
+        Mark as Paid
+    </label>
+`;
+
+        billsList.appendChild(billItem);
+    });
+}
+
 
         // Edit Bill
         window.editBill = (id) => {
@@ -315,6 +373,40 @@ include '../navbar.php';
                 if (data.success) {
                     fetchBills();
                 }
+            }
+        };
+
+        // Mark a bill as paid
+        window.markAsPaid = async (id, paid) => {
+            const formData = new FormData();
+            formData.append('action', 'togglePaid');
+            formData.append('reminder_id', id);
+            formData.append('paid', paid ? 1 : 0);
+
+            const response = await fetch('bills_process.php', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            if (data.success && paid) {
+                // Update the due date based on the billing frequency
+                const bill = bills.find(b => b.ReminderID == id);
+                if (bill) {
+                    let newDueDate = new Date(bill.BillDue);
+                    switch (bill.BillFrequency) {
+                        case 'Monthly':
+                            newDueDate.setMonth(newDueDate.getMonth() + 1);
+                            break;
+                        case 'Quarterly':
+                            newDueDate.setMonth(newDueDate.getMonth() + 3);
+                            break;
+                        case 'Yearly':
+                            newDueDate.setFullYear(newDueDate.getFullYear() + 1);
+                            break;
+                    }
+                    bill.BillDue = newDueDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+                }
+                fetchBills();
             }
         };
 
