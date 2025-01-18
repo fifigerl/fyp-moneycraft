@@ -1,7 +1,7 @@
 <?php
 session_start();
 include '../config.php';
-include '../navbar.php';
+
 
 // Include the logging function
 function logUserActivity($conn, $userId, $username, $action, $type = null) {
@@ -29,67 +29,259 @@ logUserActivity($conn, $user_id, $username, "Viewed Budgets Page", "View");
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Budgets</title>
-    <link rel="stylesheet" href="../styles.css">
-    <link rel="stylesheet" href="css/navbar.css">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #F8F9FA;
+            color: #161925;
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1.budget-header {
+            font-weight: 900;
+            font-size: 48px;
+            color: rgb(0, 35, 72);
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background-color: #FFFFFF;
+            border-radius: 20px;
+            padding: 20px;
+            border: none;
+        }
+
+        .table {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .table th, .table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .table th {
+            font-weight: bold;
+            color: #161925;
+        }
+
+        .table td {
+            color: #333;
+        }
+
+        .progress {
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #e9ecef;
+        }
+
+        .progress-bar {
+            background-color: #FFD000;
+            color: #161925;
+            font-weight: bold;
+            text-align: center;
+            transition: width 0.3s ease;
+        }
+
+        .add-budget-btn {
+            background-color: #FFD000;
+            color: #161925;
+            font-weight: bold;
+            border-radius: 15px;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .add-budget-btn:hover {
+            background-color: #FDF09D;
+        }
+
+        .btn-edit {
+            background-color: #FFD000;
+            color: #161925;
+            font-weight: bold;
+            border-radius: 10px;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-delete {
+            background-color: #FF4D4D;
+            color: white;
+            font-weight: bold;
+            border-radius: 10px;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Styling for the modal animation */
+        .modal.fade .modal-dialog {
+            transform: translateY(-50px);
+            opacity: 0;
+            transition: all 0.3s ease-out;
+        }
+
+        .modal.show .modal-dialog {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Styling for form fields */
+        .modal-content {
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .modal-content input,
+        .modal-content select,
+        .modal-content button {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-content input:focus,
+        .modal-content select:focus {
+            border-color: #FFD000;
+            box-shadow: 0 0 8px rgba(255, 208, 0, 0.5);
+            outline: none;
+        }
+
+        .modal-content button {
+            background-color: #FFD000;
+            color: #161925;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+
+        .modal-content button:hover {
+            background-color: #FDF09D;
+        }
+
+        /* Styling for the close button */
+        .modal-content .btn-close-custom {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 30px;
+            height: 30px;
+            background-color: #FFD000;
+            color: #161925;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .modal-content .btn-close-custom:hover {
+            background-color: #FDF09D;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <div class="budget-header">
-            <h1 class="budget-title">My Budgets</h1>
+<?php include '../navbar.php'; ?>
+    <div class="container mt-4">
+        <h1 class="budget-header">My Budgets</h1>
+        <div class="d-flex justify-content-between align-items-center mb-3">
             <button id="add-budget-btn" class="add-budget-btn">
                 <i class="fas fa-plus"></i> Add Budget
             </button>
         </div>
-        <div id="budgets-list"></div>
-    </div>
 
-    <div id="budget-modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <form id="budget-form">
-                <input type="hidden" name="action" value="save">
-                <input type="hidden" name="budget_id" id="budget_id">
-                <input type="text" name="title" id="budget-title" placeholder="Budget Title" required>
-                <select name="category" id="budget-category" required>
-                    <optgroup label="Expense">
-                        <option value="Tuition Fees">Tuition Fees</option>
-                        <option value="Rent">Rent</option>
-                        <option value="Utilities">Utilities</option>
-                        <option value="Groceries">Groceries</option>
-                        <option value="Dining Out">Dining Out</option>
-                        <option value="Transportation">Transportation</option>
-                        <option value="School Supplies">School Supplies</option>
-                        <option value="Technology">Technology</option>
-                        <option value="Health and Wellness">Health and Wellness</option>
-                        <option value="Entertainment">Entertainment</option>
-                        <option value="Shopping">Shopping</option>
-                        <option value="Other">Other</option>
-                    </optgroup>
-                </select>
-                <input type="number" name="amount" id="budget-amount" placeholder="Amount" required>
-                <input type="date" name="start_date" id="budget-start" required>
-                <input type="date" name="end_date" id="budget-end" required>
-                <button type="submit">Save</button>
-            </form>
+        <div class="card p-4 shadow-sm" style="border-radius: 20px;">
+            <h3 class="mb-4">Budget Overview</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Amount (RM)</th>
+                        <th>Progress</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="budgets-list">
+                    <!-- Rows will be populated dynamically -->
+                </tbody>
+            </table>
         </div>
     </div>
 
+    <!-- Budget Modal -->
+    <div id="budget-modal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <button type="button" class="btn-close-custom" data-bs-dismiss="modal">&times;</button>
+                <div class="modal-header">
+                    <h5 class="modal-title">Add/Edit Budget</h5>
+                </div>
+                <form id="budget-form">
+                    <div class="modal-body">
+                        <input type="hidden" name="budget_id" id="budget_id">
+                        <input type="text" name="title" id="budget-title" placeholder="Budget Title" required>
+                        <select name="category" id="budget-category" required>
+                            <optgroup label="Expense">
+                                <option value="Tuition Fees">Tuition Fees</option>
+                                <option value="Rent">Rent</option>
+                                <option value="Utilities">Utilities</option>
+                                <option value="Groceries">Groceries</option>
+                                <option value="Dining Out">Dining Out</option>
+                                <option value="Transportation">Transportation</option>
+                                <option value="School Supplies">School Supplies</option>
+                                <option value="Technology">Technology</option>
+                                <option value="Health and Wellness">Health and Wellness</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Shopping">Shopping</option>
+                                <option value="Other">Other</option>
+                            </optgroup>
+                        </select>
+                        <input type="number" name="amount" id="budget-amount" placeholder="Amount" required>
+                        <input type="date" name="start_date" id="budget-start" required>
+                        <input type="date" name="end_date" id="budget-end" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const budgetsList = document.getElementById('budgets-list');
-            const budgetModal = document.getElementById('budget-modal');
-            const closeModal = document.querySelector('.close');
-            const addBudgetBtn = document.getElementById('add-budget-btn');
+            const budgetModal = new bootstrap.Modal(document.getElementById('budget-modal'));
             const budgetForm = document.getElementById('budget-form');
-            let submitted = false;
+            const addBudgetBtn = document.getElementById('add-budget-btn');
 
             async function fetchBudgets() {
                 try {
-                    const response = await fetch('budgets_process.php', {
-                        method: 'GET'
-                    });
+                    const response = await fetch('budgets_process.php', { method: 'GET' });
                     const data = await response.json();
                     renderBudgets(data);
                 } catch (error) {
@@ -98,58 +290,68 @@ logUserActivity($conn, $user_id, $username, "Viewed Budgets Page", "View");
             }
 
             function renderBudgets(budgets) {
-                budgetsList.innerHTML = '';
+                budgetsList.innerHTML = ''; // Clear previous rows
 
                 budgets.forEach(budget => {
-                    const budgetDiv = document.createElement('div');
-                    budgetDiv.classList.add('budget');
-                    budgetDiv.innerHTML = `
-                        <p>${budget.BudgetTitle} - ${budget.BudgetCat} - RM${parseFloat(budget.BudgetAmt).toFixed(2)} - ${budget.BudgetStart} to ${budget.BudgetEnd}</p>
-                        <button onclick="deleteBudget(${budget.BudgetID})">Delete</button>
-                        <button onclick='editBudget(${JSON.stringify(budget)})'>Edit</button>
+                    const progressPercentage = budget.CurrentSavings && budget.BudgetAmt ? Math.min((budget.CurrentSavings / budget.BudgetAmt) * 100, 100).toFixed(2) : 0;
+                    const row = document.createElement('tr');
+
+                    row.innerHTML = `
+                        <td>${budget.BudgetTitle}</td>
+                        <td>${budget.BudgetCat}</td>
+                        <td>RM${parseFloat(budget.BudgetAmt).toFixed(2)}</td>
+                        <td>
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: ${progressPercentage}%">${progressPercentage}%</div>
+                            </div>
+                        </td>
+                        <td>${budget.BudgetStart}</td>
+                        <td>${budget.BudgetEnd}</td>
+                        <td>
+                            <button class="btn-edit" onclick='editBudget(${JSON.stringify(budget)})'>Edit</button>
+                            <button class="btn-delete" onclick='deleteBudget(${budget.BudgetID})'>Delete</button>
+                        </td>
                     `;
-                    budgetsList.appendChild(budgetDiv);
+
+                    budgetsList.appendChild(row);
                 });
             }
 
             addBudgetBtn.addEventListener('click', () => {
                 budgetForm.reset();
                 document.getElementById('budget_id').value = '';
-                budgetModal.style.display = 'block';
-            });
-
-            closeModal.addEventListener('click', () => {
-                budgetModal.style.display = 'none';
+                budgetModal.show();
             });
 
             budgetForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                if (submitted) return;
-                submitted = true;
-
                 const formData = new FormData(budgetForm);
-                formData.append("action", "save");
-
+                formData.append('action', 'save');
                 try {
                     const response = await fetch('budgets_process.php', {
                         method: 'POST',
                         body: formData
                     });
                     const data = await response.json();
+                    alert(data.success || data.error);
                     if (data.success) {
-                        budgetModal.style.display = 'none';
-                        budgetForm.reset();
+                        budgetModal.hide();
                         fetchBudgets();
-
-                        // Log the action of adding a budget
-                        logUserActivity(<?php echo $user_id; ?>, "<?php echo $username; ?>", "Added a budget", "Budget");
                     }
                 } catch (error) {
-                    console.error("Error submitting budget:", error);
-                } finally {
-                    submitted = false;
+                    console.error("Error saving budget:", error);
                 }
             });
+
+            window.editBudget = (budget) => {
+                document.getElementById('budget_id').value = budget.BudgetID;
+                document.getElementById('budget-title').value = budget.BudgetTitle;
+                document.getElementById('budget-category').value = budget.BudgetCat;
+                document.getElementById('budget-amount').value = budget.BudgetAmt;
+                document.getElementById('budget-start').value = budget.BudgetStart;
+                document.getElementById('budget-end').value = budget.BudgetEnd;
+                budgetModal.show();
+            };
 
             window.deleteBudget = async (budgetID) => {
                 if (confirm('Are you sure you want to delete this budget?')) {
@@ -163,29 +365,12 @@ logUserActivity($conn, $user_id, $username, "Viewed Budgets Page", "View");
                             body: formData
                         });
                         const data = await response.json();
-                        if (data.success) {
-                            fetchBudgets();
-
-                            // Log the action of deleting a budget
-                            logUserActivity(<?php echo $user_id; ?>, "<?php echo $username; ?>", "Deleted a budget", "Budget");
-                        }
+                        alert(data.success || data.error);
+                        fetchBudgets();
                     } catch (error) {
                         console.error("Error deleting budget:", error);
                     }
                 }
-            };
-
-            window.editBudget = (budget) => {
-                document.getElementById('budget_id').value = budget.BudgetID;
-                document.getElementById('budget-title').value = budget.BudgetTitle;
-                document.getElementById('budget-category').value = budget.BudgetCat;
-                document.getElementById('budget-amount').value = budget.BudgetAmt;
-                document.getElementById('budget-start').value = budget.BudgetStart.split(' ')[0];
-                document.getElementById('budget-end').value = budget.BudgetEnd.split(' ')[0];
-                budgetModal.style.display = 'block';
-
-                // Log the action of editing a budget
-                logUserActivity(<?php echo $user_id; ?>, "<?php echo $username; ?>", "Edited a budget", "Budget");
             };
 
             fetchBudgets();

@@ -1,7 +1,7 @@
 <?php 
 // Initialize the session
 session_start();
-include 'navbar.php'; 
+
 
 // Check if the user is logged in, if not then redirect them to login page
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
@@ -291,6 +291,7 @@ h1.text-left {
 
 </head>
 <body>
+<?php include 'navbar.php'; ?>
    
 
   <!-- Welcome back message -->

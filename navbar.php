@@ -1,29 +1,31 @@
 <?php
-
-
-
-
 // Include database configuration
 require_once 'config.php'; // Adjust the path if needed
 
-// Fetch the logged-in user's username
+
+// Initialize the username variable
 $username = 'User'; // Default value
-if (isset($_SESSION['id'])) {
+if (isset($_SESSION['id']) && $conn) { // Ensure $conn is active
     $user_id = $_SESSION['id'];
 
     // Fetch the username from the database
     $sql = "SELECT Username FROM Users WHERE UserID = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $user = $result->fetch_assoc();
+    if ($stmt) {
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
 
-    if ($user) {
-        $username = $user['Username'];
+        if ($user) {
+            $username = $user['Username'];
+        }
+
+        $stmt->close(); // Close the statement explicitly
     }
 }
 ?>
+
 
 
 <!DOCTYPE html>

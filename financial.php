@@ -460,4 +460,3 @@ function getYouTubeID($url) {
     });
 </script>
 </body>
-

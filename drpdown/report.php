@@ -1,108 +1,78 @@
 <?php
-// Start the session
+// Initialize the session
 session_start();
+
+// Check if the user is logged in
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+    header("location: login.php");
+    exit;
+}
 
 // Include config file
 require_once '../config.php';
 
-// Check if the user is logged in
-if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
-    header("location: ../login.php");
-    exit;
+// Get the logged-in user's ID
+$user_id = $_SESSION['id'];
+
+// Fetch transaction data based on date range
+$date_filter = "";
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $start_date = $_POST['start_date'];
+    $end_date = $_POST['end_date'];
+    $date_filter = "AND TranDate BETWEEN '$start_date' AND '$end_date'";
+} else {
+    // Default: last 30 days
+    $start_date = date('Y-m-d', strtotime('-30 days'));
+    $end_date = date('Y-m-d');
+    $date_filter = "AND TranDate BETWEEN '$start_date' AND '$end_date'";
 }
 
-$user_id = $_SESSION['id']; // Use session user ID
-
-// Initialize arrays for financial data
-$transactions = [];
-$income = [];
-$expenses = [];
-$categories = [];
-
-// Determine the selected period
-$selectedPeriod = $_GET['period'] ?? 'monthly';
-
-// Fetch transactions based on the selected period
-$periodCondition = '';
-switch ($selectedPeriod) {
-    case 'daily':
-        $periodCondition = "AND TranDate = CURDATE()";
-        break;
-    case 'weekly':
-        $periodCondition = "AND YEARWEEK(TranDate, 1) = YEARWEEK(CURDATE(), 1)";
-        break;
-    case 'monthly':
-        $periodCondition = "AND MONTH(TranDate) = MONTH(CURDATE()) AND YEAR(TranDate) = YEAR(CURDATE())";
-        break;
-    case 'yearly':
-        $periodCondition = "AND YEAR(TranDate) = YEAR(CURDATE())";
-        break;
-}
-
-$sql = "SELECT TranID, TranTitle, TranAmount, TranType, TranCat, TranDate 
+// Fetch transaction trends
+$sql = "SELECT TranDate, TranAmount, TranType, TranCat 
         FROM Transactions 
-        WHERE UserID = ? $periodCondition";
-if ($stmt = $conn->prepare($sql)) {
-    $stmt->bind_param("i", $user_id);
-    if ($stmt->execute()) {
-        $result = $stmt->get_result();
-        while ($row = $result->fetch_assoc()) {
-            $transactions[] = $row;
-            if ($row['TranType'] === 'income') {
-                $income[] = $row;
-            } else {
-                $expenses[] = $row;
-                $categories[$row['TranCat']] = ($categories[$row['TranCat']] ?? 0) + $row['TranAmount'];
-            }
-        }
-    }
-    $stmt->close();
+        WHERE UserID = ? $date_filter
+        ORDER BY TranDate";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$transaction_data = $stmt->get_result();
+
+// Prepare data for charts
+$transaction_trends = [];
+$category_breakdown = [];
+while ($row = $transaction_data->fetch_assoc()) {
+    $date = $row['TranDate'];
+    $amount = $row['TranAmount'];
+    $type = $row['TranType'];
+    $category = $row['TranCat'];
+
+    // Transaction trends data
+    $transaction_trends[$date][$type] = ($transaction_trends[$date][$type] ?? 0) + $amount;
+
+    // Category breakdown data
+    $category_breakdown[$category] = ($category_breakdown[$category] ?? 0) + $amount;
 }
 
-$conn->close();
+// Prepare savings goal progress
+$sql = "SELECT SavingsTitle, SavingsAmt, CurrentSavings 
+        FROM Savings 
+        WHERE UserID = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$savings_goals = $stmt->get_result();
 
-// Calculate totals
-$totalIncome = array_sum(array_column($income, 'TranAmount'));
-$totalExpenses = array_sum(array_column($expenses, 'TranAmount'));
-$savingsTotal = $totalIncome - $totalExpenses;
-
-// Function to categorize transactions by time period
-function categorizeTransactions($transactions, $period) {
-    $categorized = [];
-    $now = new DateTime();
-
-    foreach ($transactions as $transaction) {
-        $date = new DateTime($transaction['TranDate']);
-        $interval = $now->diff($date);
-
-        switch ($period) {
-            case 'daily':
-                if ($interval->days === 0) {
-                    $categorized[] = $transaction;
-                }
-                break;
-            case 'weekly':
-                if ($interval->days <= 7) {
-                    $categorized[] = $transaction;
-                }
-                break;
-            case 'monthly':
-                if ($interval->m === 0 && $interval->y === 0) {
-                    $categorized[] = $transaction;
-                }
-                break;
-            case 'yearly':
-                if ($interval->y === 0) {
-                    $categorized[] = $transaction;
-                }
-                break;
-        }
-    }
-
-    return $categorized;
+$savings_progress = [];
+while ($row = $savings_goals->fetch_assoc()) {
+    $progress = round(($row['CurrentSavings'] / $row['SavingsAmt']) * 100, 2);
+    $savings_progress[] = [
+        'title' => $row['SavingsTitle'],
+        'target' => $row['SavingsAmt'],
+        'saved' => $row['CurrentSavings'],
+        'progress' => $progress
+    ];
 }
 
-$categorizedTransactions = categorizeTransactions($transactions, $selectedPeriod);
 ?>
 
 <!DOCTYPE html>
@@ -110,94 +80,122 @@ $categorizedTransactions = categorizeTransactions($transactions, $selectedPeriod
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Reports</title>
-    <link rel="stylesheet" href="../css/navbar.css">
-    <link rel="stylesheet" href="../styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Report - MoneyCraft</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+        }
+        .card {
+            border-radius: 20px;
+            border: none;
+        }
+    </style>
 </head>
-<body class="report-page">
-    <?php include '../navbar.php'; ?>
-  
-    <div class="report-container">
-        <h2>My Reports</h2>
-        <form method="GET" action="">
-            <label for="period">Select Report Period:</label>
-            <select name="period" id="period" onchange="this.form.submit()">
-                <option value="daily" <?php if ($selectedPeriod == 'daily') echo 'selected'; ?>>Daily</option>
-                <option value="weekly" <?php if ($selectedPeriod == 'weekly') echo 'selected'; ?>>Weekly</option>
-                <option value="monthly" <?php if ($selectedPeriod == 'monthly') echo 'selected'; ?>>Monthly</option>
-                <option value="yearly" <?php if ($selectedPeriod == 'yearly') echo 'selected'; ?>>Yearly</option>
-            </select>
-        </form>
-        <div class="report-summary-overview">
-            <h3>Summary Overview</h3>
-            <p>Total Income: RM<?php echo number_format($totalIncome, 2); ?></p>
-            <p>Total Expenses: RM<?php echo number_format($totalExpenses, 2); ?></p>
-            <p>Savings: RM<?php echo number_format($savingsTotal, 2); ?></p>
+<body>
+<?php include '../navbar.php'; ?>
+
+<div class="container mt-4">
+    <h1 class="text-left mb-4">📊 Your Reports</h1>
+
+    <!-- Date Range Filter -->
+    <form method="POST" class="mb-4">
+        <div class="row g-3">
+            <div class="col-md-5">
+                <label for="start_date" class="form-label">Start Date</label>
+                <input type="date" name="start_date" class="form-control" value="<?php echo htmlspecialchars($start_date); ?>">
+            </div>
+            <div class="col-md-5">
+                <label for="end_date" class="form-label">End Date</label>
+                <input type="date" name="end_date" class="form-control" value="<?php echo htmlspecialchars($end_date); ?>">
+            </div>
+            <div class="col-md-2 align-self-end">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
         </div>
-        <div class="report-section">
-            <h3>Expenses by Category</h3>
-            <canvas id="expensesByCategoryChart"></canvas>
+    </form>
+
+    <div class="row">
+        <!-- Transaction Trends -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Transaction Trends</h4>
+                    <div id="transactionTrendsChart"></div>
+                </div>
+            </div>
         </div>
-        <div class="report-section">
-            <h3>Spending Trends</h3>
-            <canvas id="spendingTrendsChart"></canvas>
+
+        <!-- Category Breakdown -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Category Breakdown</h4>
+                    <div id="categoryBreakdownChart"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Savings Goal Progress -->
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Savings Goals Progress</h4>
+                    <div class="row">
+                        <?php foreach ($savings_progress as $goal): ?>
+                            <div class="col-md-4 mb-3">
+                                <h5><?php echo htmlspecialchars($goal['title']); ?></h5>
+                                <p>Target: RM<?php echo number_format($goal['target'], 2); ?></p>
+                                <p>Saved: RM<?php echo number_format($goal['saved'], 2); ?></p>
+                                <p>Progress: <?php echo $goal['progress']; ?>%</p>
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" style="width: <?php echo $goal['progress']; ?>%;" aria-valuenow="<?php echo $goal['progress']; ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-  
-    <script>
-        // Expenses by Category Chart
-        const expensesByCategoryCtx = document.getElementById('expensesByCategoryChart').getContext('2d');
-        const expensesByCategoryChart = new Chart(expensesByCategoryCtx, {
-            type: 'pie',
-            data: {
-                labels: <?php echo json_encode(array_keys($categories)); ?>,
-                datasets: [{
-                    data: <?php echo json_encode(array_values($categories)); ?>,
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(153, 102, 255, 0.2)',
-                        'rgba(255, 159, 64, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        'rgba(255, 159, 64, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            }
-        });
 
-        // Spending Trends Chart
-        const spendingTrendsCtx = document.getElementById('spendingTrendsChart').getContext('2d');
-        const spendingTrendsChart = new Chart(spendingTrendsCtx, {
+    <!-- Export Options -->
+    <div class="text-end">
+        <button class="btn btn-secondary" onclick="window.print()">Print Report</button>
+    </div>
+</div>
+
+<!-- ApexCharts Configuration -->
+<script>
+    // Transaction Trends Chart
+    var transactionTrendsOptions = {
+        chart: {
             type: 'line',
-            data: {
-                labels: <?php echo json_encode(array_map(function($t) { return $t['TranDate']; }, $categorizedTransactions)); ?>,
-                datasets: [{
-                    label: 'Expenses',
-                    data: <?php echo json_encode(array_map(function($t) { return $t['TranAmount']; }, $categorizedTransactions)); ?>,
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    </script>
-    
+            height: 350
+        },
+        series: [
+            { name: 'Income', data: <?php echo json_encode(array_column($transaction_trends, 'Income', 'date')); ?> },
+            { name: 'Expenses', data: <?php echo json_encode(array_column($transaction_trends, 'Expense', 'date')); ?> }
+        ],
+        xaxis: { categories: <?php echo json_encode(array_keys($transaction_trends)); ?> }
+    };
+    var transactionTrendsChart = new ApexCharts(document.querySelector("#transactionTrendsChart"), transactionTrendsOptions);
+    transactionTrendsChart.render();
+
+    // Category Breakdown Chart
+    var categoryBreakdownOptions = {
+        chart: {
+            type: 'pie',
+            height: 350
+        },
+        series: <?php echo json_encode(array_values($category_breakdown)); ?>,
+        labels: <?php echo json_encode(array_keys($category_breakdown)); ?>
+    };
+    var categoryBreakdownChart = new ApexCharts(document.querySelector("#categoryBreakdownChart"), categoryBreakdownOptions);
+    categoryBreakdownChart.render();
+</script>
 </body>
 </html>
