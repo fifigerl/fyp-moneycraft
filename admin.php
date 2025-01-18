@@ -88,14 +88,103 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(to bottom right, #ffffff, hsl(64, 100%, 97%));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .login-container {
+            width: 400px;
+            background: #fff;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .login-container img {
+            width: 100px;
+            height: auto;
+            margin-bottom: 1rem;
+        }
+
+        .login-container h2 {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+
+        .input-group label {
+            font-size: 0.9rem;
+            color: #333;
+            display: block;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .login-btn {
+            width: 100%;
+            background-color: #ffdd00;
+            color: #fff;
+            border: none;
+            padding: 0.75rem 0;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .login-btn:hover {
+            background-color: rgb(172, 130, 41);
+        }
+
+        .error-message {
+            background-color: #ffeded;
+            color: #d32f2f;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid #d32f2f;
+            border-radius: 5px;
+        }
+
+        .error {
+            color: #d32f2f;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            display: block;
+        }
+    </style>
 </head>
 <body>
     <div class="login-container">
-        <div class="logo">
-            <img src="images/logo.jpg" alt="logo">
-        </div>
+        <img src="images/moneycraftnewlogo.png" alt="logo">
         <h2>Admin Login</h2>
         
         <?php 
@@ -120,4 +209,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 </body>
 </html>
-

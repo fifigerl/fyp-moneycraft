@@ -152,10 +152,9 @@ $latest_video_id = getYouTubeID($latest_resource['ResourceLink'] ?? '');
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <!--Modern Font-->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-   
-   <style>
-    
-/*index.php style*/ 
+
+    <style>
+    /*index.php style*/ 
 body {
     background-color: #f8f9fa; /* Set the page background color */
     color: #161925;
@@ -284,10 +283,8 @@ h1.text-left {
         height: 180px; /* Adjust the iframe height for small screens */
     }
 }
-
-        </style>
-
-   
+</style>
+  
 
 </head>
 <body>

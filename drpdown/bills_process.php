@@ -44,6 +44,28 @@ if ($action == 'create') {
     $stmt = $conn->prepare("UPDATE BillsReminder SET Paid = ? WHERE ReminderID = ?");
     $stmt->bind_param("ii", $paid, $reminderId);
     $stmt->execute();
+    echo json_encode(['success' => 'Bill payment status updated successfully']);
+
+
+
+} elseif ($action == 'countOverdue') {
+    $userId = $_POST['user_id'];
+    $today = date('Y-m-d'); // Current date
+
+    // Query to count overdue and unpaid bills
+    $stmt = $conn->prepare("
+        SELECT COUNT(*) as OverdueCount 
+        FROM BillsReminder 
+        WHERE UserID = ? AND BillDue < ? AND Paid = 0
+    ");
+    $stmt->bind_param("is", $userId, $today);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $overdueCount = $result->fetch_assoc()['OverdueCount'] ?? 0;
+
+    echo json_encode(['overdueCount' => $overdueCount]);
+ 
+
 
     if ($paid) {
         // Fetch the current bill details

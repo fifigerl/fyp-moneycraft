@@ -11,8 +11,6 @@ if (!isset($_SESSION["admin_loggedin"]) || $_SESSION["admin_loggedin"] !== true 
 // Include config file
 require_once 'config.php';
 
-// Include the admin navbar
-include 'admin_navbar.php';
 
 // Get admin ID from session
 $admin_id = $_SESSION["admin_id"];
@@ -51,86 +49,176 @@ $message = isset($_GET['message']) ? $_GET['message'] : '';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Uploaded Materials</title>
-    <link rel="stylesheet" href="../css/navbar.css">
+    <title>Manage Materials</title>
     <style>
-    body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f9f9f9;
+        /* General Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom, #C5C5C5, #FFFFFF);
+            color: #161925;
+            margin: 0;
             padding: 20px;
         }
+
         .materials-container {
-            max-width: 800px;
-            margin: auto;
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 20px;
         }
+
         .materials-container h2 {
+            font-size: 2rem;
+            font-weight: bold;
+            color: rgb(0, 35, 72);
+            text-align: center;
             margin-bottom: 20px;
-            color: #4a148c;
         }
+
+        .add-material-btn {
+            background-color: #FFD000;
+            color: #161925;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 10px;
+            display: inline-block;
+            transition: background-color 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .add-material-btn:hover {
+            background-color: #FDF09D;
+            color: #222;
+        }
+
         .material-item {
             background-color: #fff;
-            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease-in-out;
         }
+
+        .material-item iframe {
+            width: 100%;
+            height: 250px;
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
         .material-info {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
+
         .material-info h3 {
-            color: #4a148c;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: rgb(0, 35, 72);
             margin-bottom: 10px;
         }
+
         .material-info p {
-            margin-bottom: 5px;
-            color: #1b1b1b;
+            font-size: 1rem;
+            color: #555;
         }
+
         .material-info .date {
-            font-size: 0.9em;
-            color: #666;
+            font-size: 0.9rem;
+            color: #888;
         }
+
         .material-actions {
             display: flex;
             gap: 10px;
         }
-        .material-actions button {
-            background-color: #ffcc00;
-            color: #1b1b1b;
-            padding: 5px 10px;
+
+        .material-actions button,
+        .material-actions form button {
+            background-color: #FFD000;
+            color: #161925;
             border: none;
-            border-radius: 4px;
-            cursor: pointer;
+            padding: 10px 15px;
+            font-size: 1rem;
             font-weight: bold;
-        }
-        .material-actions button:hover {
-            background-color: #e6b800;
-        }
-        .add-material-btn {
-            background-color: #4a148c;
-            color: #fff;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-decoration: none;
-            display: inline-block;
+            transition: background-color 0.3s;
         }
-        .add-material-btn:hover {
-            background-color: #3b0d6b;
+
+        .material-actions button:hover,
+        .material-actions form button:hover {
+            background-color: #FDF09D;
+            color: #222;
         }
-        .form-container, .edit-form-container {
+
+        /* Edit Form Styles */
+        .edit-form-container {
             display: none;
-            max-width: 600px;
-            margin: auto;
             background-color: #fff;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
-        </style>
+
+        .edit-form-container h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .edit-form-container .input-group {
+            margin-bottom: 15px;
+        }
+
+        .edit-form-container label {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .edit-form-container input,
+        .edit-form-container textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .edit-form-container button {
+            background-color: #FFD000;
+            color: #161925;
+            border: none;
+            padding: 10px 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .edit-form-container button:hover {
+            background-color: #FDF09D;
+            color: #222;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
     <script>
         function editMaterial(id, title, content, link) {
             document.getElementById('edit_resource_id').value = id;
@@ -147,31 +235,11 @@ $message = isset($_GET['message']) ? $_GET['message'] : '';
     </script>
 </head>
 <body>
+<?php include 'admin_navbar.php'; ?>
     <div class="materials-container">
         <h2>Manage Financial Education Materials</h2>
         <a href="add_materials.php" class="add-material-btn">Add Materials</a>
-        <?php if (!empty($message)): ?>
-            <p><?php echo htmlspecialchars($message); ?></p>
-        <?php endif; ?>
-        <div class="edit-form-container">
-            <h2>Edit Material</h2>
-            <form action="materials_process.php" method="POST">
-                <input type="hidden" id="edit_resource_id" name="resource_id">
-                <div class="input-group">
-                    <label for="edit_title">Title</label>
-                    <input type="text" id="edit_title" name="title" required>
-                </div>
-                <div class="input-group">
-                    <label for="edit_content">Article</label>
-                    <textarea id="edit_content" name="content" required></textarea>
-                </div>
-                <div class="input-group">
-                    <label for="edit_link">Video Link</label>
-                    <input type="url" id="edit_link" name="link" required>
-                </div>
-                <button type="submit" name="edit_resource" class="submit-btn">Update Material</button>
-            </form>
-        </div>
+
         <?php if (empty($materials)): ?>
             <p>No materials uploaded yet.</p>
         <?php else: ?>
@@ -179,18 +247,20 @@ $message = isset($_GET['message']) ? $_GET['message'] : '';
                 <div class="material-item">
                     <?php $video_id = getYouTubeID($material['ResourceLink']); ?>
                     <?php if ($video_id): ?>
-                        <iframe width="100%" height="300" src="https://www.youtube.com/embed/<?php echo $video_id; ?>" frameborder="0" allowfullscreen></iframe>
+                        <iframe src="https://www.youtube.com/embed/<?php echo $video_id; ?>" allowfullscreen></iframe>
                     <?php else: ?>
                         <p>Invalid YouTube link.</p>
                     <?php endif; ?>
+
                     <div class="material-info">
                         <h3><?php echo htmlspecialchars($material['ResourceTitle']); ?></h3>
-                        <p class="date">Added <?php echo date('j F Y', strtotime($material['ContentDate'])); ?>.</p>
-                        <p>Source: Youtube. Retrieved From <?php echo htmlspecialchars($material['ResourceLink']); ?></p>
+                        <p class="date">Added on <?php echo date('j F Y', strtotime($material['ContentDate'])); ?></p>
+                        <p>Source: YouTube. Retrieved from <?php echo htmlspecialchars($material['ResourceLink']); ?></p>
                     </div>
+
                     <div class="material-actions">
                         <button onclick="editMaterial(<?php echo $material['ResourceID']; ?>, '<?php echo htmlspecialchars($material['ResourceTitle']); ?>', '<?php echo htmlspecialchars($material['ResourceCont']); ?>', '<?php echo htmlspecialchars($material['ResourceLink']); ?>')">Edit</button>
-                        <form action="materials_process.php" method="POST" style="display:inline;">
+                        <form action="materials_process.php" method="POST" style="display: inline;">
                             <input type="hidden" name="resource_id" value="<?php echo $material['ResourceID']; ?>">
                             <button type="submit" name="delete_resource">Delete</button>
                         </form>
@@ -200,4 +270,4 @@ $message = isset($_GET['message']) ? $_GET['message'] : '';
         <?php endif; ?>
     </div>
 </body>
-</html> 
+</html>

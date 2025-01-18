@@ -221,6 +221,18 @@ include '../navbar.php';
 .custom-checkbox input[type="checkbox"]:checked + .checkmark:after {
     display: block;
 }
+
+.overdue-notification {
+    background-color: #ffe6e6;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    border: 1px solid #ffcccc;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+}
+
 </style>
 
         
@@ -232,6 +244,7 @@ include '../navbar.php';
         <button id="add-bill-btn">+ Add Bill</button>
         <div id="bills-list"></div>
     </div>
+ 
 
     <div id="bill-modal" class="modal">
         <div class="modal-content">
@@ -294,6 +307,25 @@ include '../navbar.php';
             }
         };
 
+        //overdue count notification
+        async function fetchOverdueCount() {
+    const response = await fetch('bills_process.php', {
+        method: 'POST',
+        body: new URLSearchParams({
+            action: 'countOverdue',
+            user_id: <?php echo $user_id; ?>
+        })
+    });
+
+    const data = await response.json();
+    document.getElementById('overdue-count').innerText = data.overdueCount;
+}
+
+
+// Call this function on page load
+fetchOverdueCount();
+
+
         async function fetchBills() {
             const response = await fetch('bills_process.php', {
                 method: 'POST',
@@ -302,7 +334,6 @@ include '../navbar.php';
             bills = await response.json();
             renderBills(bills);
         }
-
         function renderBills(bills) {
     billsList.innerHTML = '';
     const today = new Date();
@@ -316,31 +347,31 @@ include '../navbar.php';
         const billItem = document.createElement('div');
         billItem.className = 'bill-item';
         billItem.innerHTML = `
-    <div class="bill-details">
-        <h4>${bill.BillTitle}</h4>
-        <p>Amount: RM${bill.BillAmt}</p>
-        <p>Due: ${bill.BillDue}</p>
-        <p>Frequency: ${bill.BillFrequency}</p>
-        <p>
-            <span style="color: ${isOverdue ? 'red' : 'green'}; font-weight: bold;">
-                ${isOverdue ? `Overdue by ${Math.abs(daysLeft)} day(s)` : `${daysLeft} day(s) left`}
-            </span>
-        </p>
-    </div>
-    <div class="bill-actions">
-        <button onclick="editBill(${bill.ReminderID})">Edit</button>
-        <button class="delete-button" onclick="deleteBill(${bill.ReminderID})">Delete</button>
-    </div>
-    <label class="custom-checkbox">
-        <input type="checkbox" ${bill.Paid ? 'checked' : ''} onclick="markAsPaid(${bill.ReminderID}, this.checked)">
-        <span class="checkmark"></span>
-        Mark as Paid
-    </label>
-`;
-
+            <div class="bill-details">
+                <h4>${bill.BillTitle}</h4>
+                <p>Amount: RM${bill.BillAmt}</p>
+                <p>Due: ${bill.BillDue}</p>
+                <p>Frequency: ${bill.BillFrequency}</p>
+                <p>
+                    <span style="color: ${isOverdue ? 'red' : 'green'}; font-weight: bold;">
+                        ${isOverdue ? `Overdue by ${Math.abs(daysLeft)} day(s)` : `${daysLeft} day(s) left`}
+                    </span>
+                </p>
+            </div>
+            <div class="bill-actions">
+                <button onclick="editBill(${bill.ReminderID})">Edit</button>
+                <button class="delete-button" onclick="deleteBill(${bill.ReminderID})">Delete</button>
+            </div>
+            <label class="custom-checkbox">
+                <input type="checkbox" ${bill.Paid == 1 ? 'checked' : ''} onclick="markAsPaid(${bill.ReminderID}, this.checked)">
+                <span class="checkmark"></span>
+                Mark as Paid
+            </label>
+        `;
         billsList.appendChild(billItem);
     });
 }
+
 
 
         // Edit Bill
@@ -376,39 +407,49 @@ include '../navbar.php';
             }
         };
 
-        // Mark a bill as paid
-        window.markAsPaid = async (id, paid) => {
-            const formData = new FormData();
-            formData.append('action', 'togglePaid');
-            formData.append('reminder_id', id);
-            formData.append('paid', paid ? 1 : 0);
+       // Mark a bill as paid or unpaid
+window.markAsPaid = async (id, paid) => {
+    const formData = new FormData();
+    formData.append('action', 'togglePaid');
+    formData.append('reminder_id', id);
+    formData.append('paid', paid ? 1 : 0);
 
-            const response = await fetch('bills_process.php', {
-                method: 'POST',
-                body: formData
-            });
-            const data = await response.json();
-            if (data.success && paid) {
-                // Update the due date based on the billing frequency
-                const bill = bills.find(b => b.ReminderID == id);
-                if (bill) {
-                    let newDueDate = new Date(bill.BillDue);
-                    switch (bill.BillFrequency) {
-                        case 'Monthly':
-                            newDueDate.setMonth(newDueDate.getMonth() + 1);
-                            break;
-                        case 'Quarterly':
-                            newDueDate.setMonth(newDueDate.getMonth() + 3);
-                            break;
-                        case 'Yearly':
-                            newDueDate.setFullYear(newDueDate.getFullYear() + 1);
-                            break;
-                    }
-                    bill.BillDue = newDueDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+    const response = await fetch('bills_process.php', {
+        method: 'POST',
+        body: formData
+    });
+    const data = await response.json();
+
+    if (data.success) {
+        // If the bill is marked as paid, update its due date
+        if (paid) {
+            const bill = bills.find(b => b.ReminderID == id);
+            if (bill) {
+                let newDueDate = new Date(bill.BillDue);
+                switch (bill.BillFrequency) {
+                    case 'Monthly':
+                        newDueDate.setMonth(newDueDate.getMonth() + 1);
+                        break;
+                    case 'Quarterly':
+                        newDueDate.setMonth(newDueDate.getMonth() + 3);
+                        break;
+                    case 'Yearly':
+                        newDueDate.setFullYear(newDueDate.getFullYear() + 1);
+                        break;
                 }
-                fetchBills();
+                bill.BillDue = newDueDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
             }
-        };
+        } else {
+            // If marked as unpaid, no change to due date
+            console.log(`Bill ${id} marked as unpaid.`);
+        }
+
+        fetchBills(); // Refresh the list
+    } else {
+        alert(data.error || 'An error occurred.');
+    }
+};
+
 
         fetchBills();
     });

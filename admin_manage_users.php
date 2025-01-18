@@ -54,17 +54,23 @@ foreach ($months as $index => $month) {
     $activity_counts[] = $activity_data[$index + 1] ?? 0; // Default to 0 if no data
 }
 
-// Fetch recent activity logs from the database
-$activity_sql = "SELECT Username, Action, Timestamp, Type FROM UserActivities ORDER BY Timestamp DESC LIMIT 10";
-$activity_result = $conn->query($activity_sql);
+// Fetch user activity data grouped by day
+$activity_data_sql = "SELECT DATE(Timestamp) AS day, COUNT(*) AS activity_count 
+                      FROM UserActivities 
+                      GROUP BY day 
+                      ORDER BY day ASC";
+$activity_data_result = $conn->query($activity_data_sql);
 
-$activity_logs = [];
-if ($activity_result) {
-    while ($row = $activity_result->fetch_assoc()) {
-        $activity_logs[] = $row;
+$activity_labels = []; // Dates
+$activity_counts = []; // Activity counts
+
+if ($activity_data_result) {
+    while ($row = $activity_data_result->fetch_assoc()) {
+        $activity_labels[] = $row['day'];
+        $activity_counts[] = $row['activity_count'];
     }
 } else {
-    echo "Error fetching activity logs: " . $conn->error;
+    echo "Error fetching user activity data: " . $conn->error;
 }
 
 // Fetch total transactions for each user
@@ -81,6 +87,21 @@ if ($transactions_result) {
 } else {
     echo "Error fetching transactions: " . $conn->error;
 }
+
+
+// Fetch recent activity logs from the database
+$activity_sql = "SELECT Username, Action, Timestamp, Type FROM UserActivities ORDER BY Timestamp DESC LIMIT 10";
+$activity_result = $conn->query($activity_sql);
+
+$activity_logs = [];
+if ($activity_result) {
+    while ($row = $activity_result->fetch_assoc()) {
+        $activity_logs[] = $row;
+    }
+} else {
+    echo "Error fetching activity logs: " . $conn->error;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -89,273 +110,247 @@ if ($transactions_result) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Users</title>
-    <link rel="stylesheet" href="css/navbar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.css">
-   <style>
-     /*admin_manage_users.php styles*/
-
-
-     body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f9f9f9;
-            padding: 20px;
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa; 
+            color: #161925;
+            font-family: 'Inter', sans-serif;
         }
 
-        .admin-container {
-            max-width: 1200px;
-            margin: auto;
-            padding: 20px;
+        h1 {
+            
+            font-weight: 900;
+            color: rgb(0, 35, 72);
+            margin-bottom: 20px;
         }
 
-        .admin-dashboard-header {
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+      /* Adjust the stats container to display items side by side */
+.admin-stats-container {
+    display: flex;
+    justify-content: space-between; /* Evenly space out cards */
+    gap: 20px; /* Add spacing between cards */
+    margin-bottom: 30px; /* Add spacing below the stats container */
+}
 
-        .admin-dashboard-header h2 {
-            color: #4a148c;
-            font-size: 2em;
-        }
+.admin-stat-card {
+    flex: 1; /* Ensure all cards take equal width */
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px hsla(0, 0.00%, 0.00%, 0.10);
+    text-align: center; /* Center-align text inside the card */
+    transition: transform 0.3s ease; /* Add hover animation */
+}
 
-        .admin-dark-mode-toggle {
-            cursor: pointer;
-            font-size: 1.5em;
-        }
+.admin-stat-card:hover {
+    transform: translateY(-5px); /* Move card up slightly on hover */
+}
 
-        .admin-stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
+.admin-stat-card h3 {
+    color:rgb(108, 107, 107);
+    margin-bottom: 10px;
+}
 
-        .admin-stat-card {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            position: relative;
-            transition: transform 0.3s ease;
-        }
-
-        .admin-stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .admin-stat-card h3 {
-            color: #4a148c;
-            margin-bottom: 10px;
-        }
-
-        .admin-stat-card i {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 1.5em;
-            color: #4a148c;
-        }
-
-        .admin-users-table {
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            margin-bottom: 30px;
-        }
+.admin-stat-card i {
+    font-size: 2em;
+    color: #ffdd00;
+    margin-bottom: 10px;
+}
 
         .admin-table {
             width: 100%;
             border-collapse: collapse;
-        }
-
-        .admin-th, .admin-td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .admin-th {
-            background-color: #4a148c;
-            color: white;
-        }
-
-        .admin-tr:hover {
-            background-color: #f5f5f5;
-        }
-
-        .admin-status {
-            padding: 5px 10px;
+            background-color: #FFFFFF;
             border-radius: 15px;
-            font-size: 0.9em;
-        }
-
-        .admin-status-active {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .admin-status-inactive {
-            background-color: #ffebee;
-            color: #c62828;
-        }
-
-        .admin-activity-logs {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-        }
-
-        .admin-activity-item {
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        .admin-activity-item:last-child {
-            border-bottom: none;
-        }
-
-        .admin-activity-time {
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        .admin-action-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .admin-btn {
-            padding: 5px 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9em;
-        }
-
-        .admin-btn-view {
-            background-color: #4a148c;
-            color: white;
-        }
-
-        .admin-btn-suspend {
-            background-color: #f44336;
-            color: white;
-        }
-
-        .admin-search-bar {
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
         }
 
-        .admin-search-bar input {
+        .admin-table th {
+            background-color: #FFD000;
+            color: #161925;
             padding: 10px;
-            width: 300px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            text-align: left;
         }
 
-        .admin-chart-container {
-            margin-bottom: 30px;
+        .admin-table td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
         }
+
+        .admin-table tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .btn-primary {
+            background-color: #FFD000;
+            color: #161925;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 15px;
+            font-weight: bold;
+        }
+
+        .btn-primary:hover {
+            background-color: #FDF09D;
+        }
+
+        .admin-activity-logs {
+            background-color: #FFFFFF;
+            border-radius: 15px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .admin-activity-logs h4 {
+            color: rgb(0, 35, 72);
+            margin-bottom: 20px;
+        }
+
+        .activity-item {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-item strong {
+            color: #FFD000;
+        }
+
+        .activity-item span {
+            color: #555;
+            font-size: 0.9em;
+        }
+
+        
+    .chart-container {
+        background-color: #FFFFFF;
+        border-radius: 15px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+
+    .chart-title {
+        font-weight: bold;
+        color: rgb(0, 35, 72);
+        margin-bottom: 20px;
+    }
+
+
     </style>
-   
 </head>
+
+
 <body>
     <?php include 'admin_navbar.php'; ?>
-    
     <div class="admin-container">
-        <div class="admin-dashboard-header">
-            <h2>User Management Dashboard</h2>
-            <i class="fas fa-moon admin-dark-mode-toggle" onclick="toggleDarkMode()"></i>
-        </div>
+        <h1>User Management Dashboard</h1>
 
+        <!-- Stats Section -->
         <div class="admin-stats-container">
-            <div class="admin-stat-card">
-                <h3>Total Users</h3>
-                <i class="fas fa-users"></i>
-                <p><?php echo count($users); ?></p>
-            </div>
-            <div class="admin-stat-card">
-                <h3>Active Users</h3>
-                <i class="fas fa-user-check"></i>
-                <p><?php echo $active_users_count; ?></p>
-            </div>
-            <div class="admin-stat-card">
-                <h3>Total Transactions</h3>
-                <i class="fas fa-exchange-alt"></i>
-                <p><?php echo $total_transactions_all_users; ?></p>
-            </div>
+    <div class="admin-stat-card">
+        <h3>Total Users</h3>
+        <i class="fas fa-users"></i>
+        <p><?php echo count($users); ?></p>
+    </div>
+    <div class="admin-stat-card">
+        <h3>Active Users</h3>
+        <i class="fas fa-user-check"></i>
+        <p><?php echo $active_users_count; ?></p>
+    </div>
+    <div class="admin-stat-card">
+        <h3>Total Transactions</h3>
+        <i class="fas fa-exchange-alt"></i>
+        <p><?php echo $total_transactions_all_users; ?></p>
+    </div>
+</div>
+
         </div>
 
-        <div class="admin-chart-container">
-            <canvas id="userActivityChart"></canvas>
-        </div>
+        <div class="chart-container">
+    <h3 class="chart-title">
+        <i class="fas fa-calendar-day" style="margin-right: 10px; color: #FFD000;"></i>
+        User Activity by Day
+    </h3>
+    <div id="userActivityChart" style="height: 350px;"></div>
+</div>
 
-        <div class="admin-search-bar">
-            <input type="text" id="userSearch" placeholder="Search users..." onkeyup="searchUsers()">
-        </div>
 
-        <div class="admin-users-table">
-            <table class="admin-table">
-                <thead>
-                    <tr class="admin-tr">
-                        <th class="admin-th">Username</th>
-                        <th class="admin-th">Email</th>
-                        <th class="admin-th">Join Date</th>
-                        <th class="admin-th">Status</th>
-                        <th class="admin-th">Total Transactions</th>
-                        <th class="admin-th">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($users as $user): ?>
-                    <tr class="admin-tr">
-                        <td class="admin-td"><?php echo htmlspecialchars($user['Username']); ?></td>
-                        <td class="admin-td"><?php echo htmlspecialchars($user['UserEmail']); ?></td>
-                        <td class="admin-td"><?php echo date('j M Y', strtotime($user['createdAt'])); ?></td>
-                        <td class="admin-td"><?php echo htmlspecialchars($user['status']); ?></td>
-                        <td class="admin-td"><?php echo $transactions[$user['UserID']] ?? 0; ?></td>
-                        <td class="admin-td admin-action-buttons">
-                            <button class="admin-btn admin-btn-view" onclick="viewUser(<?php echo $user['UserID']; ?>)">
-                                <i class="fas fa-eye"></i> View
-                            </button>
-                            <?php if ($user['status'] === 'active'): ?>
-                                <button class="admin-btn admin-btn-suspend" onclick="toggleUserStatus(<?php echo $user['UserID']; ?>, 'suspend')">
-                                    <i class="fas fa-ban"></i> Suspend
-                                </button>
-                            <?php else: ?>
-                                <button class="admin-btn admin-btn-activate" onclick="toggleUserStatus(<?php echo $user['UserID']; ?>, 'activate')">
-                                    <i class="fas fa-check"></i> Activate
-                                </button>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
 
-        <div class="admin-activity-logs">
-            <h3>Recent Activity Logs</h3>
-            <div id="activity-log-container">
-                <?php foreach ($activity_logs as $log): ?>
-                <div class="admin-activity-item">
-                    <p>
-                        <strong><?php echo htmlspecialchars($log['Username']); ?></strong>
-                        <?php echo htmlspecialchars($log['Action']); ?>
-                    </p>
-                    <span class="admin-activity-time">
-                        <?php echo date('j M Y H:i', strtotime($log['Timestamp'])); ?>
-                    </span>
-                </div>
+        <!-- Users Table -->
+        <h2>Manage Users</h2>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Join Date</th>
+                    <th>Status</th>
+                    <th>Total Transactions</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($users as $user): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($user['Username']); ?></td>
+                    <td><?php echo htmlspecialchars($user['UserEmail']); ?></td>
+                    <td><?php echo date('j M Y', strtotime($user['createdAt'])); ?></td>
+                    <td><?php echo htmlspecialchars($user['status']); ?></td>
+                    <td><?php echo $transactions[$user['UserID']] ?? 0; ?></td>
+                    <td>
+                        <button class="btn-primary" onclick="viewUser(<?php echo $user['UserID']; ?>)">View</button>
+                        <?php if ($user['status'] === 'active'): ?>
+                            <button class="btn-primary" onclick="toggleUserStatus(<?php echo $user['UserID']; ?>, 'suspend')">Suspend</button>
+                        <?php else: ?>
+                            <button class="btn-primary" onclick="toggleUserStatus(<?php echo $user['UserID']; ?>, 'activate')">Activate</button>
+                        <?php endif; ?>
+                    </td>
+                </tr>
                 <?php endforeach; ?>
+            </tbody>
+        </table>
+
+        <!-- Activity Logs -->
+        <div class="admin-activity-logs">
+            <h4>Recent Activity Logs</h4>
+            <?php foreach ($activity_logs as $log): ?>
+            <div class="activity-item">
+                <p>
+                    <strong><?php echo htmlspecialchars($log['Username']); ?></strong> <?php echo htmlspecialchars($log['Action']); ?>
+                </p>
+                <span><?php echo date('j M Y H:i', strtotime($log['Timestamp'])); ?></span>
             </div>
+            <?php endforeach; ?>
         </div>
     </div>
+
+    <script>
+        function viewUser(userId) {
+            alert('Viewing user details for ID: ' + userId);
+        }
+
+        function toggleUserStatus(userId, action) {
+            if (confirm(`Are you sure you want to ${action} this user?`)) {
+                // AJAX call logic here
+            }
+        }
+    </script>
+</body>
+
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
     <script>
@@ -451,5 +446,61 @@ if ($transactions_result) {
             });
         }, 5000); // Update every 5 seconds
     </script>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+    // User Activity Chart Configuration
+    const activityOptions = {
+        chart: {
+            type: 'line',
+            height: 350,
+            toolbar: {
+                show: false
+            }
+        },
+        series: [{
+            name: 'User Activity',
+            data: <?php echo json_encode($activity_counts); ?> // Activity counts
+        }],
+        xaxis: {
+            categories: <?php echo json_encode($activity_labels); ?>, // Dates
+            title: {
+                text: 'Date'
+            },
+            labels: {
+                rotate: -45, // Rotate labels for better visibility
+                formatter: function(value) {
+                    return new Date(value).toLocaleDateString(); // Format as readable date
+                }
+            }
+        },
+        yaxis: {
+            title: {
+                text: 'Activity Count'
+            }
+        },
+        colors: ['#FFD000'],
+        markers: {
+            size: 5
+        },
+        stroke: {
+            width: 2,
+            curve: 'smooth'
+        },
+        tooltip: {
+            shared: true,
+            intersect: false
+        },
+        grid: {
+            borderColor: '#f1f1f1'
+        }
+    };
+
+    // Render the chart
+    const activityChart = new ApexCharts(document.querySelector("#userActivityChart"), activityOptions);
+    activityChart.render();
+</script>
+
+
 </body>
 </html> 

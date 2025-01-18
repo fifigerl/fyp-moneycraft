@@ -1,32 +1,28 @@
 <?php
-// Include database configuration
-require_once 'config.php'; // Adjust the path if needed
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once 'config.php';
 
+// Default username if not logged in
+$username = 'Guest';
 
-// Initialize the username variable
-$username = 'User'; // Default value
-if (isset($_SESSION['id']) && $conn) { // Ensure $conn is active
+if (isset($_SESSION['id'])) {
     $user_id = $_SESSION['id'];
 
     // Fetch the username from the database
     $sql = "SELECT Username FROM Users WHERE UserID = ?";
     $stmt = $conn->prepare($sql);
-    if ($stmt) {
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $user = $result->fetch_assoc();
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
 
-        if ($user) {
-            $username = $user['Username'];
-        }
-
-        $stmt->close(); // Close the statement explicitly
+    if ($user) {
+        $username = htmlspecialchars($user['Username']);
     }
 }
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -36,12 +32,15 @@ if (isset($_SESSION['id']) && $conn) { // Ensure $conn is active
     <title>MoneyCraft Dashboard</title>
     <link rel="stylesheet" href="../css/navbar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
 </head>
 <body>
     <nav class="navbar">
         <!-- Left Section: Logo -->
         <div class="logo">
-            <img src="../images/logo.jpg" alt="MoneyCraft Logo">
+            <img src="../images/moneycraftnewlogo.png" alt="MoneyCraft Logo">
         </div>
 
         <!-- Center Section: Links -->
@@ -59,27 +58,43 @@ if (isset($_SESSION['id']) && $conn) { // Ensure $conn is active
                 </div>
             </li>
             <li><a href="../financial.php">Learning Center</a></li>
-            <li><a href="../account.php">Account</a></li>
         </ul>
 
         <!-- Right Section: User Info -->
         <div class="navbar-end">
-    <div class="profile">
+        <div class="profile">
+    <a href="../account.php" title="Account">
         <i class="fa-regular fa-circle-user"></i>
         
-    </div>
-    <a href="../logout.php" class="button">Logout</a>
+    </a>
 </div>
 
+<div class="navbar-username">
+<span>  Hi, <?php echo $username; ?></span>
+</div>
+
+
+            <a href="../logout.php" class="button">Logout</a>
+        </div>
     </nav>
 </body>
 <script>
-    // Highlight active link
+    // Highlight the active link
     const currentPage = window.location.pathname;
     const navLinks = document.querySelectorAll('.nav-links a, .dropdown-content a');
     navLinks.forEach(link => {
         if (new URL(link.href).pathname === currentPage) {
             link.classList.add('active');
+        }
+    });
+
+    // Add scroll effect for navbar
+    const navbar = document.querySelector('.navbar');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
         }
     });
 </script>

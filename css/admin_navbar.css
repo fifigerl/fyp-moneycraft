@@ -1,6 +1,6 @@
 /* General Reset */
 * {
-    margin: 0;
+    margin:0;
     padding: 0;
     box-sizing: border-box;
 }
@@ -8,32 +8,32 @@
 /* Navbar Styles */
 .navbar {
     position: relative;
-    z-index: 100; /* Ensure navbar stays above other elements */
+    z-index: 100;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: rgb(255, 255, 255); /* Background color */
-    padding: 10px 40px;
+    background-color: rgb(255, 255, 255);
+    padding: 15px 50px;
     font-family: "Nunito", serif;
     top: 0;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-    transition: all 0.3s ease-in-out; /* Smooth animation on scroll */
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
 }
 
 .navbar.scrolled {
-    background-color: #fff; /* Change background on scroll */
+    background-color: #fff;
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
 }
 
 /* Logo Section */
 .logo img {
-    width: 120px;
+    width: 140px;
     height: auto;
-    transition: transform 0.3s ease-in-out; /* Add smooth scaling effect */
+    transition: transform 0.3s ease-in-out;
 }
 
 .logo img:hover {
-    transform: scale(1.1); /* Scale logo on hover */
+    transform: scale(1.1);
 }
 
 /* Navigation Links */
@@ -49,14 +49,14 @@
     text-decoration: none;
     font-size: 16px;
     color: #1b1b1b;
-    font-weight: 500;
+    font-weight: 600;
     position: relative;
     transition: color 0.3s, transform 0.3s;
 }
 
 .nav-links a:hover {
-    color: #ffdd00;
-    transform: scale(1.1); /* Slight scaling effect on hover */
+    color: #4a148c;
+    transform: scale(1.1);
 }
 
 .nav-links a::after {
@@ -67,7 +67,7 @@
     transform: translateX(-50%);
     width: 0;
     height: 2px;
-    background-color: #ffdd00;
+    background-color: #4a148c;
     transition: width 0.3s ease-in-out;
 }
 
@@ -77,7 +77,7 @@
 
 /* Dropdown Styles */
 .dropdown {
-    position: relative; /* Parent positioning for dropdown */
+    position: relative;
 }
 
 .dropdown-content {
@@ -86,7 +86,7 @@
     background-color: #fff;
     min-width: 160px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    z-index: 1050; /* Higher z-index to stay above other elements */
+    z-index: 1050;
     border-radius: 5px;
     overflow: hidden;
     opacity: 0;
@@ -112,11 +112,11 @@
     transform: translateY(0);
 }
 
-/* User Info Section */
+/* Admin Info Section */
 .navbar-end {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 25px;
 }
 
 .profile {
@@ -126,42 +126,40 @@
 }
 
 .profile i {
-    color: #FFD000;
-    font-size: 20px;
+    color: #4a148c;
+    font-size: 22px;
     transition: transform 0.3s ease-in-out;
 }
 
 .profile span {
-    color: #1b1b1b; /* Black text */
-    font-size: 16px; /* Adjust font size */
-    font-weight: 500; /* Slightly bold */
-    text-decoration: none; /* No underline */
-    cursor: default; /* No pointer cursor */
-    transition: none; /* No hover effects */
+    color: #1b1b1b;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: default;
 }
 
 .profile i:hover {
-    color: #3b3b3b;
-    transform: scale(1.2); /* Slight rotation effect on hover */
-
+    transform: scale(1.2);
+    color: #6a1b9a;
 }
 
 /* Logout Button */
 .button {
-    background-color: #c5c5c5;
+    background-color: #e0e0e0;
     color: #000000;
-    padding: 8px 20px;
+    padding: 10px 25px;
     border: none;
     border-radius: 20px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     transition: background-color 0.3s, transform 0.3s;
 }
 
 .button:hover {
-    background-color: #161925;
-    color: #ffff;
+    background-color: #4a148c;
+    color: #ffffff;
     transform: scale(1.1);
 }
 
@@ -182,17 +180,16 @@
         gap: 10px;
         margin-top: 10px;
     }
+}
 
-    /* Highlight the active link */
+/* Highlight the active link */
 .nav-links a.active, .dropdown-content a.active {
-    color: #ffdd00; /* Highlighted text color */
-    font-weight: bold; /* Make the active link bold */
-    border-bottom: 2px solid #FFD000b6; /* Add a bottom border for emphasis */
+    color: #4a148c;
+    font-weight: bold;
+    border-bottom: 2px solid #4a148c;
 }
 
 .nav-links a.active:hover, .dropdown-content a.active:hover {
-    transform: none; /* Disable hover effects for the active link */
-    color: #ffdd00; /* Keep the same color on hover */
-}
-
+    transform: none;
+    color: #4a148c;
 }

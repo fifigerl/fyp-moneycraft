@@ -1,6 +1,35 @@
 <?php
-// Include config file
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Include configuration
 require_once 'config.php';
+
+// Check if the user is logged in
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header("location: login.php");
+    exit;
+}
+
+// Fetch logged-in user's username
+$username = 'User'; // Default username
+if (isset($_SESSION['id'])) {
+    $user_id = $_SESSION['id'];
+
+    // Fetch username from the database
+    $sql = "SELECT Username FROM Users WHERE UserID = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+
+    if ($user) {
+        $username = htmlspecialchars($user['Username']);
+    }
+}
 
 // Fetch all financial education resources
 $sql = "SELECT ResourceID, ResourceTitle, ResourceCont, ResourceLink, ContentDate FROM FinancialEducationResources";
@@ -12,8 +41,6 @@ if ($result = $conn->query($sql)) {
     }
 }
 
-$conn->close();
-
 // Function to extract YouTube video ID
 function getYouTubeID($url) {
     if (preg_match('/(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]+)|(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/', $url, $matches)) {
@@ -21,8 +48,6 @@ function getYouTubeID($url) {
     }
     return null;
 }
-
-
 ?>
 
 <!DOCTYPE html>
@@ -36,6 +61,29 @@ function getYouTubeID($url) {
 
 
 <style>
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
     body {
     margin: 0;
     padding: 0;
@@ -61,6 +109,7 @@ function getYouTubeID($url) {
     margin: 0; /* Remove any margins */
     width: 100%; /* Ensure it spans the full width */
     box-sizing: border-box; /* Include padding in width calculation */
+    animation: fadeIn 1s ease-out;
 }
 
 
@@ -106,6 +155,7 @@ function getYouTubeID($url) {
     text-align: center;
     margin: 0; /* Remove any unwanted margin */
     padding: 0; /* Remove padding */
+    animation: slideIn 1.2s ease-out;
 }
 
 .financial-page .hero-illustration svg {
@@ -122,11 +172,14 @@ function getYouTubeID($url) {
     gap: 50px;
     margin-top: 50px;
     flex-wrap: wrap;
+    animation: fadeIn 1.5s ease-out;
 }
 
 .financial-page .feature-item {
     text-align: center;
     max-width: 200px;
+    opacity: 0;
+    animation: fadeIn 0.8s ease-out forwards;
 }
 
 .financial-page .feature-item img {
@@ -274,6 +327,8 @@ function getYouTubeID($url) {
 .btn-primary {
     margin-bottom: 20px; /* Add margin below the button */
 }
+
+    
 
 
 </style>
@@ -459,4 +514,12 @@ function getYouTubeID($url) {
         });
     });
 </script>
+
+<script>
+    // Add delay to card animations
+    document.querySelectorAll('.card').forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.2}s`;
+    });
+</script>
+
 </body>
