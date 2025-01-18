@@ -381,39 +381,54 @@ function getYouTubeID($url) {
         </div>
 
        <!-- Resource Materials Section -->
-<div class="resources" id="resources-section" style="display: none;">
-<h2 style="font-weight: bold;">
-  <i class="fa-solid fa-graduation-cap" style="color:rgb(0, 0, 0); margin-right: 10px;"></i>Available Financial Resources
-</h2>
-
-    <div class="card-container">
+       <div class="resources" id="resources-section" style="display: none;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-weight: bold;">
+            <i class="fa-solid fa-graduation-cap" style="color:rgb(0, 0, 0); margin-right: 10px;"></i>
+            Available Financial Resources
+        </h2>
+ <!-- Search Bar -->
+ <div style="margin-left: auto; position: relative; width: 300px;">
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search for titles..."
+                style="padding: 10px 40px; border: 1px solid #ccc; border-radius: 5px; width: 100%;"
+            />
+            <i 
+                class="fa fa-search"
+                style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #888; font-size: 16px;">
+            </i>
+        </div>
+    </div>
+    <div class="card-container" id="cardContainer">
         <?php foreach ($resources as $resource): ?>
             <?php $video_id = getYouTubeID($resource['ResourceLink']); ?>
-            <div class="card">
-    <?php if ($video_id): ?>
-        <iframe 
-            src="https://www.youtube.com/embed/<?php echo $video_id; ?>" 
-            allowfullscreen>
-        </iframe>
-    <?php else: ?>
-        <p>Invalid YouTube link.</p>
-    <?php endif; ?>
-    <div class="card-body">
-        <h4 class="card-title"><?php echo htmlspecialchars($resource['ResourceTitle']); ?></h4>
-        <div class="card-meta">
-            <span class="duration">15:00 min</span> <!-- Fake duration -->
-            <button class="favorite-btn" aria-label="Add to Favorites">
-                <img src="https://cdn-icons-png.flaticon.com/512/833/833472.png" alt="Heart Icon" />
-            </button>
-        </div>
-        <p class="card-text">Added <?php echo date('j F Y', strtotime($resource['ContentDate'])); ?>.</p>
-        <a href="view_financial.php?id=<?php echo $resource['ResourceID']; ?>" class="btn-primary">Learn More</a>
-    </div>
-</div>
-
+            <div class="card" data-title="<?php echo strtolower(htmlspecialchars($resource['ResourceTitle'])); ?>">
+                <?php if ($video_id): ?>
+                    <iframe 
+                        src="https://www.youtube.com/embed/<?php echo $video_id; ?>" 
+                        allowfullscreen>
+                    </iframe>
+                <?php else: ?>
+                    <p>Invalid YouTube link.</p>
+                <?php endif; ?>
+                <div class="card-body">
+                    <h4 class="card-title"><?php echo htmlspecialchars($resource['ResourceTitle']); ?></h4>
+                    <div class="card-meta">
+                        <span class="duration">15:00 min</span> <!-- Fake duration -->
+                        <button class="favorite-btn" aria-label="Add to Favorites">
+                            <img src="https://cdn-icons-png.flaticon.com/512/833/833472.png" alt="Heart Icon" />
+                        </button>
+                    </div>
+                    <p class="card-text">Added <?php echo date('j F Y', strtotime($resource['ContentDate'])); ?>.</p>
+                    <a href="view_financial.php?id=<?php echo $resource['ResourceID']; ?>" class="btn-primary">Learn More</a>
+                </div>
+            </div>
         <?php endforeach; ?>
     </div>
 </div>
+
 
 
     <!-- JavaScript to Toggle Resources -->
@@ -426,6 +441,23 @@ function getYouTubeID($url) {
             });
         });
     </script>
-</body>
 
+    <!-- JavaScript for Search Functionality -->
+<script>
+    document.getElementById('searchInput').addEventListener('input', function () {
+        const query = this.value.toLowerCase(); // Convert the input to lowercase for case-insensitive matching
+        const cards = document.querySelectorAll('.card'); // Get all resource cards
+
+        // Iterate through the cards and filter them based on the search input
+        cards.forEach((card) => {
+            const title = card.getAttribute('data-title'); // Get the card's title (stored in the data-title attribute)
+            if (title.includes(query)) {
+                card.style.display = 'block'; // Show the card if it matches the search query
+            } else {
+                card.style.display = 'none'; // Hide the card if it doesn't match
+            }
+        });
+    });
+</script>
+</body>
 
