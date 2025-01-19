@@ -48,6 +48,8 @@ while ($row = $result->fetch_assoc()) {
 }
 
 
+
+
 include '../navbar.php'; 
 ?>
 
@@ -57,6 +59,8 @@ include '../navbar.php';
     <meta charset="UTF-8">
     <title>My Transactions - MoneyCraft</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.1/dist/tesseract.min.js"></script>
+
     <!-- Inline Styles -->
     <style>
         body {
@@ -413,8 +417,8 @@ include '../navbar.php';
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
     <button id="add-transaction" class="tran-add-button">+ Add New Transaction</button>
-    
-    
+    <button id="scan-receipt" class="tran-add-button" style="background-color: #00B74A;">Scan Receipt</button>
+
     <!-- Filter by Date -->
     <div class="tran-filter">
         <label for="filter-date" style="font-weight: bold; margin-right: 10px;">Filter by Date:</label>
@@ -477,6 +481,16 @@ include '../navbar.php';
             <button type="submit">Save Transaction</button>
         </form>
     </div>
+
+    <div id="scan-receipt-modal" class="tran-modal">
+    <span class="close">&times;</span>
+    <div style="text-align: center;">
+        <video id="camera-stream" autoplay playsinline style="width: 100%; border-radius: 15px;"></video>
+        <canvas id="receipt-canvas" style="display: none;"></canvas>
+        <button id="capture-receipt" class="tran-add-button" style="margin-top: 10px;">Capture Receipt</button>
+    </div>
+</div>
+
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -816,7 +830,122 @@ if (tran.TranType === 'Income') {
         const cashFlowTrendChart = new ApexCharts(document.querySelector("#cashFlowTrendChart"), trendChartOptions);
         cashFlowTrendChart.render();
     });
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+            const scanReceiptBtn = document.getElementById('scan-receipt');
+            const scanReceiptModal = document.getElementById('scan-receipt-modal');
+            const closeScanReceipt = scanReceiptModal.querySelector('.close');
+            const video = document.getElementById('camera-stream');
+            const canvas = document.getElementById('receipt-canvas');
+            const captureReceiptBtn = document.getElementById('capture-receipt');
+
+            // Open camera and display modal
+            scanReceiptBtn.addEventListener('click', async () => {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    video.srcObject = stream;
+                    scanReceiptModal.style.display = 'block';
+                } catch (error) {
+                    alert('Camera access denied or unavailable.');
+                }
+            });
+
+            // Close modal and stop camera
+            closeScanReceipt.addEventListener('click', () => {
+                const stream = video.srcObject;
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+                scanReceiptModal.style.display = 'none';
+            });
+
+            // Capture receipt and process it
+            captureReceiptBtn.addEventListener('click', () => {
+                const ctx = canvas.getContext('2d');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                // Use Tesseract.js to extract text
+                Tesseract.recognize(canvas.toDataURL(), 'eng').then(({ data: { text } }) => {
+                    // Extract amount
+                    const totalMatch = text.match(/(?:total|amount due|amt|sum)[:\s]?\$?(\d+(\.\d{1,2})?)/i);
+                    if (totalMatch) {
+                        const amount = parseFloat(totalMatch[1]);
+                        // Save extracted data to database
+                        const saveData = new FormData();
+                        saveData.append('action', 'save');
+                        saveData.append('title', 'Scanned Receipt');
+                        saveData.append('type', 'Expense');
+                        saveData.append('category', 'Uncategorized');
+                        saveData.append('amount', amount);
+                        saveData.append('date', new Date().toISOString().split('T')[0]);
+
+                        fetch('tran_process.php', { method: 'POST', body: saveData })
+                            .then(response => response.json())
+                            .then(result => {
+                                if (result.success) {
+                                    alert(result.success);
+                                    location.reload(); // Refresh the page
+                                } else {
+                                    alert(result.error || 'Failed to save transaction.');
+                                }
+                            })
+                            .catch(err => alert('Error saving transaction.'));
+                    } else {
+                        alert('Unable to extract amount. Please try again.');
+                    }
+                }).catch(err => alert('Error processing receipt.'));
+            });
+        });
+
+
+
 </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const scanReceiptBtn = document.getElementById('scan-receipt');
+        const processReceiptBtn = document.getElementById('process-receipt');
+        const scanReceiptModal = document.getElementById('scan-receipt-modal');
+        const video = document.getElementById('camera-stream');
+
+        // Open modal and start camera
+        scanReceiptBtn.addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                scanReceiptModal.style.display = 'block';
+            } catch (error) {
+                alert('Camera access denied or unavailable.');
+            }
+        });
+
+        // Close modal
+        document.querySelector('.close').addEventListener('click', () => {
+            const stream = video.srcObject;
+            const tracks = stream.getTracks();
+            tracks.forEach(track => track.stop());
+            scanReceiptModal.style.display = 'none';
+        });
+
+        // Process receipt
+        processReceiptBtn.addEventListener('click', async () => {
+            const response = await fetch('scan_receipt_process.php', { method: 'POST' });
+            const result = await response.json();
+
+            if (result.success) {
+                alert(`Amount extracted: ${result.amount}`);
+                document.getElementById('tran_amount').value = result.amount;
+                scanReceiptModal.style.display = 'none';
+            } else {
+                alert(result.error);
+            }
+        });
+    });
+</script>
+
 
 
 </body>

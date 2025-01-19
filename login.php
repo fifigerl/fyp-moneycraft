@@ -108,7 +108,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         body {
             font-family: 'Nunito', sans-serif;
-            background: linear-gradient(to bottom right, #ffffff, hsl(64, 100%, 97%));
+            background: linear-gradient(to bottom right, #ffffff,rgb(254, 252, 228), hsl(64, 89.20%, 85.50%));
             display: flex;
             justify-content: center;
             align-items: center;
