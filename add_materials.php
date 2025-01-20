@@ -73,79 +73,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Financial Education Materials</title>
-    <link rel="stylesheet" href="../css/navbar.css">
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f9f9f9;
-            padding: 20px;
-        }
-        .form-container {
-            max-width: 600px;
-            margin: auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .form-container h2 {
-            color: #4a148c;
-            margin-bottom: 20px;
-        }
-        .input-group {
-            margin-bottom: 15px;
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #1b1b1b;
-        }
-        .input-group input, .input-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .input-group textarea {
-            resize: vertical;
-            height: 150px;
-        }
-        .submit-btn {
-            background-color: #ffcc00;
-            color: #1b1b1b;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .submit-btn:hover {
-            background-color: #e6b800;
-        }
-        .error {
-            color: red;
-            font-size: 0.9em;
-        }
+    <link rel="stylesheet" href="../css/admin_styles.css">
 
-        .back-btn {
-            background-color: #4a148c;
-            color: #fff;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            text-decoration: none; /* Remove underline from link */
-            display: inline-block; /* Ensure it behaves like a button */
-            margin-bottom: 20px; /* Add some space below the button */
-            margin-top: 30px;
-        }
-
-        .back-btn:hover {
-            background-color: #3b0d6b;
-        }
-    </style>
-</head>
+   
 <body>
     <div class="form-container">
         <h2>Manage Financial Education Materials</h2>

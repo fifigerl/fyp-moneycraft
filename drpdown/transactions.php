@@ -417,7 +417,7 @@ include '../navbar.php';
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
     <button id="add-transaction" class="tran-add-button">+ Add New Transaction</button>
-    <button id="scan-receipt" class="tran-add-button" style="background-color: #00B74A;">Scan Receipt</button>
+    <button id="scan-receipt" class="tran-add-button" style="background-color: #c5c5c5;">Scan Receipt</button>
 
     <!-- Filter by Date -->
     <div class="tran-filter">
@@ -867,8 +867,41 @@ if (tran.TranType === 'Income') {
                 canvas.height = video.videoHeight;
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
+// Convert image to grayscale
+const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+for (let i = 0; i < imageData.data.length; i += 4) {
+    const brightness = Math.max(imageData.data[i], imageData.data[i + 1], imageData.data[i + 2]);
+    const avg = (brightness + imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 4;
+    imageData.data[i] = avg;
+    imageData.data[i + 1] = avg;
+    imageData.data[i + 2] = avg;
+}
+ctx.putImageData(imageData, 0, 0);
+
+// Resize the image for faster OCR
+const resizedCanvas = document.createElement('canvas');
+resizedCanvas.width = canvas.width / 2; // Reduce to 50%
+resizedCanvas.height = canvas.height / 2;
+resizedCanvas.getContext('2d').drawImage(canvas, 0, 0, resizedCanvas.width, resizedCanvas.height);
+
+// Define a region of interest (ROI)
+const roiHeight = resizedCanvas.height * 0.6; // Adjust ROI to 60% of the height
+const roiY = resizedCanvas.height - roiHeight;
+const croppedCanvas = document.createElement('canvas');
+croppedCanvas.width = resizedCanvas.width;
+croppedCanvas.height = roiHeight;
+croppedCanvas.getContext('2d').drawImage(resizedCanvas, 0, roiY, resizedCanvas.width, roiHeight, 0, 0, resizedCanvas.width, roiHeight);
+
                 // Use Tesseract.js to extract text
-                Tesseract.recognize(canvas.toDataURL(), 'eng').then(({ data: { text } }) => {
+                Tesseract.recognize(croppedCanvas.toDataURL(), 'eng', {
+    tessedit_char_whitelist: '0123456789.$', // Focus on numbers and currency symbols
+    preserve_interword_spaces: '1', // Retain spaces between words for better matching
+    psm: 6, // Assume a uniform block of text
+})
+.then(({ data: { text } }) => {
+
+    console.log('OCR Output:', text); // Log the raw OCR text for debugging
+
                     // Extract amount
                     const totalMatch = text.match(/(?:total|amount due|amt|sum)[:\s]?\$?(\d+(\.\d{1,2})?)/i);
                     if (totalMatch) {
@@ -894,8 +927,36 @@ if (tran.TranType === 'Income') {
                             })
                             .catch(err => alert('Error saving transaction.'));
                     } else {
-                        alert('Unable to extract amount. Please try again.');
-                    }
+    alert('Unable to extract amount. Retrying with larger ROI...');
+    // Retry with a larger ROI
+    const retryROIHeight = resizedCanvas.height * 0.8; // Expand ROI to 80% of height
+    const retryCanvas = document.createElement('canvas');
+    retryCanvas.width = resizedCanvas.width;
+    retryCanvas.height = retryROIHeight;
+    retryCanvas.getContext('2d').drawImage(resizedCanvas, 0, resizedCanvas.height - retryROIHeight, resizedCanvas.width, retryROIHeight, 0, 0, resizedCanvas.width, retryROIHeight);
+
+    // Retry OCR
+    Tesseract.recognize(retryCanvas.toDataURL(), 'eng', {
+        tessedit_char_whitelist: '0123456789.$',
+        preserve_interword_spaces: '1',
+        psm: 6,
+    })
+    .then(({ data: { text: retryText } }) => {
+        console.log('Retry OCR Output:', retryText); // Log retry OCR result
+        const retryMatch = retryText.match(/(?:total|amount|due|amt|sum|balance|paid)[:\s]*\$?(\d+(\.\d{1,2})?)/i);
+        if (retryMatch) {
+            const retryAmount = parseFloat(retryMatch[1]);
+            alert(`Retry extracted: RM${retryAmount.toFixed(2)}`);
+            // Save transaction logic...
+        } else {
+            alert('Retry failed. Ensure the receipt is clear and well-lit.');
+        }
+    })
+    .catch((err) => {
+        alert('Error during retry OCR: ' + err.message);
+    });
+}
+
                 }).catch(err => alert('Error processing receipt.'));
             });
         });

@@ -43,6 +43,8 @@ if (isset($_SESSION['id'])) {
             <img src="../images/moneycraftnewlogo.png" alt="MoneyCraft Logo">
         </div>
 
+      
+
         <!-- Center Section: Links -->
         <ul class="nav-links">
             <li><a href="../index.php">Home</a></li>

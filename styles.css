@@ -127,3 +127,26 @@ h1.text-left {
         height: 180px; /* Adjust the iframe height for small screens */
     }
 }
+
+
+/*styles for view_financial.php*/ 
+.resource-details {
+    max-width: 800px;
+    margin: auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.resource-details h2 {
+    color: #4a148c;
+    margin-bottom: 10px;
+}
+.resource-details p {
+    margin-bottom: 5px;
+    color: #1b1b1b;
+}
+.resource-details .date {
+    font-size: 0.9em;
+    color: #666;
+}

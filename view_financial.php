@@ -1,6 +1,17 @@
 <?php
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 // Include config file
 require_once 'config.php';
+include 'navbar.php';
+
+// Check if the user is logged in
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header("location: login.php");
+    exit;
+}
 
 // Get the resource ID from the URL
 $resource_id = $_GET['id'] ?? null;
@@ -14,12 +25,25 @@ if ($resource_id) {
         if ($stmt->execute()) {
             $result = $stmt->get_result();
             $resource = $result->fetch_assoc();
+
+            // Check if the resource was found
+            if (!$resource) {
+                echo "<p>Resource not found. Please check the ID or try again later.</p>";
+                exit;
+            }
+        } else {
+            echo "<p>Failed to execute query: " . $stmt->error . "</p>";
+            exit;
         }
         $stmt->close();
+    } else {
+        echo "<p>Failed to prepare query: " . $conn->error . "</p>";
+        exit;
     }
+} else {
+    echo "<p>No resource ID provided. Please try again.</p>";
+    exit;
 }
-
-$conn->close();
 
 // Function to extract YouTube video ID
 function getYouTubeID($url) {
@@ -30,6 +54,7 @@ function getYouTubeID($url) {
 }
 
 $video_id = $resource ? getYouTubeID($resource['ResourceLink']) : null;
+
 ?>
 
 <!DOCTYPE html>
@@ -38,37 +63,12 @@ $video_id = $resource ? getYouTubeID($resource['ResourceLink']) : null;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($resource['ResourceTitle'] ?? 'Resource Details'); ?></title>
-    <link rel="stylesheet" href="navbar.css">
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f9f9f9;
-            padding: 20px;
-        }
-        .resource-details {
-            max-width: 800px;
-            margin: auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .resource-details h2 {
-            color: #4a148c;
-            margin-bottom: 10px;
-        }
-        .resource-details p {
-            margin-bottom: 5px;
-            color: #1b1b1b;
-        }
-        .resource-details .date {
-            font-size: 0.9em;
-            color: #666;
-        }
-    </style>
+    <link rel= "stylesheet" href="styles.css">
+  
+  
 </head>
 <body>
-    <?php include 'navbar.php'; ?>
+  
     <div class="resource-details">
         <?php if ($resource): ?>
             <h2><?php echo htmlspecialchars($resource['ResourceTitle']); ?></h2>
@@ -87,3 +87,8 @@ $video_id = $resource ? getYouTubeID($resource['ResourceLink']) : null;
     </div>
 </body>
 </html>
+
+<?php
+// Close the connection after all includes and operations
+$conn->close();
+?>

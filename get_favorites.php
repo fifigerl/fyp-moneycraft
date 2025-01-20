@@ -1,22 +1,30 @@
 <?php
-require_once 'config.php';
 session_start();
+require_once 'config.php';
 
-$userId = $_SESSION['user_id'];
+if (!isset($_SESSION['id'])) {
+    echo json_encode([]);
+    exit;
+}
 
-$sql = "SELECT ResourceID FROM Favorites WHERE UserID = ?";
+$userID = $_SESSION['id'];
+
+$sql = "SELECT r.ResourceID, r.ResourceTitle, r.ResourceLink, r.ContentDate 
+        FROM Favorites f
+        JOIN FinancialEducationResources r ON f.ResourceID = r.ResourceID
+        WHERE f.UserID = ?";
+
 $stmt = $conn->prepare($sql);
-$stmt->bind_param('i', $userId);
+$stmt->bind_param('i', $userID);
 $stmt->execute();
 $result = $stmt->get_result();
 
 $favorites = [];
 while ($row = $result->fetch_assoc()) {
-    $favorites[] = $row['ResourceID'];
+    $favorites[] = $row;
 }
 
+echo json_encode($favorites);
 $stmt->close();
 $conn->close();
-
-echo json_encode($favorites);
 ?>

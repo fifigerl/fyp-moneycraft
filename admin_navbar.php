@@ -14,6 +14,11 @@
         <div class="logo">
             <img src="../images/moneycraftnewlogo.png" alt="Admin Logo">
         </div>
+
+        <div class = "h1">
+        <h1> Admin Page </h1>
+</div>  
+
         <div class="container">
             <ul class="nav-links">
                 <li><a href="admin_manage_users.php">Manage Users</a></li>

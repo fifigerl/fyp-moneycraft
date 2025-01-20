@@ -1,8 +1,12 @@
 /* General Reset */
 * {
-    margin:0;
+    margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+.h1 {
+    margin-top: 10px;
 }
 
 /* Navbar Styles */
@@ -13,7 +17,7 @@
     justify-content: space-between;
     align-items: center;
     background-color: rgb(255, 255, 255);
-    padding: 15px 50px;
+    padding: 10px 20px; /* Reduced padding for a narrower navbar */
     font-family: "Nunito", serif;
     top: 0;
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
@@ -27,7 +31,7 @@
 
 /* Logo Section */
 .logo img {
-    width: 140px;
+    width: 120px; /* Adjusted for smaller navbar */
     height: auto;
     transition: transform 0.3s ease-in-out;
 }
@@ -40,14 +44,14 @@
 .nav-links {
     list-style: none;
     display: flex;
-    gap: 30px;
+    gap: 20px; /* Reduced gap between links */
     align-items: center;
     transition: all 0.3s ease-in-out;
 }
 
 .nav-links a {
     text-decoration: none;
-    font-size: 16px;
+    font-size: 14px; /* Adjusted font size for compact design */
     color: #1b1b1b;
     font-weight: 600;
     position: relative;
@@ -56,7 +60,7 @@
 
 .nav-links a:hover {
     color: #4a148c;
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 
 .nav-links a::after {
@@ -84,7 +88,7 @@
     display: none;
     position: absolute;
     background-color: #fff;
-    min-width: 160px;
+    min-width: 140px; /* Reduced width */
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
     z-index: 1050;
     border-radius: 5px;
@@ -95,7 +99,7 @@
 }
 
 .dropdown-content a {
-    padding: 10px 15px;
+    padding: 8px 12px; /* Reduced padding for dropdown items */
     display: block;
     color: #1b1b1b;
     text-decoration: none;
@@ -116,31 +120,31 @@
 .navbar-end {
     display: flex;
     align-items: center;
-    gap: 25px;
+    gap: 15px; /* Reduced gap */
 }
 
 .profile {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px; /* Reduced gap */
 }
 
 .profile i {
     color: #4a148c;
-    font-size: 22px;
+    font-size: 20px; /* Adjusted font size */
     transition: transform 0.3s ease-in-out;
 }
 
 .profile span {
     color: #1b1b1b;
-    font-size: 16px;
+    font-size: 14px; /* Adjusted font size */
     font-weight: 600;
     text-decoration: none;
     cursor: default;
 }
 
 .profile i:hover {
-    transform: scale(1.2);
+    transform: scale(1.1);
     color: #6a1b9a;
 }
 
@@ -148,10 +152,10 @@
 .button {
     background-color: #e0e0e0;
     color: #000000;
-    padding: 10px 25px;
+    padding: 8px 20px; /* Reduced padding for smaller buttons */
     border: none;
     border-radius: 20px;
-    font-size: 14px;
+    font-size: 12px; /* Adjusted font size */
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.3s, transform 0.3s;
@@ -160,7 +164,7 @@
 .button:hover {
     background-color: #4a148c;
     color: #ffffff;
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 
 /* Responsive Design */
@@ -168,16 +172,17 @@
     .navbar {
         flex-direction: column;
         align-items: flex-start;
+        padding: 10px 15px; /* Adjusted padding for smaller screens */
     }
 
     .nav-links {
         flex-direction: column;
-        gap: 10px;
+        gap: 8px; /* Reduced gap between links */
     }
 
     .navbar-end {
         flex-direction: column;
-        gap: 10px;
+        gap: 8px; /* Reduced gap */
         margin-top: 10px;
     }
 }

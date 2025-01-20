@@ -108,7 +108,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         body {
             font-family: 'Nunito', sans-serif;
-            background: linear-gradient(to bottom right, #ffffff,rgb(254, 252, 228), hsl(64, 89.20%, 85.50%));
+            background: linear-gradient(to bottom,rgb(252, 249, 235),rgb(255, 255, 235), hsl(0, 0.00%, 99.60%));
+
             display: flex;
             justify-content: center;
             align-items: center;
@@ -134,13 +135,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         .illustration-container {
-            width: 50%;
+            width: 45%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 2rem;
+            padding: 1rem;
+            margin-right: 10px;
         }
 
         .illustration-container h1 {
@@ -153,12 +155,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .illustration-container p {
             font-size: 1.2rem;
             color: #555;
-            margin-bottom: 2rem;
+            
             line-height: 1.5;
         }
 
         .illustration-container dotlottie-player {
-            max-width: 400px;
+            max-width: 600px;
             width: 100%;
             height: auto;
         }
@@ -195,6 +197,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 1rem;
+            border: none;
         }
 
         .options {

@@ -21,13 +21,12 @@ $feedbacks = $conn->query($sql);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Feedbacks</title>
-    <link rel="stylesheet" href="../css/navbar.css">
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../css/admin_styles.css">
 </head>
 <body>
     <?php include 'admin_navbar.php'; ?>
     <div class="feedbacks-container">
-        <h2>All Feedbacks</h2>
+        <h1>All Feedbacks</h1>
         <table>
             <thead>
                 <tr>
