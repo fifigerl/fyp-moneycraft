@@ -104,6 +104,7 @@
 </head>
 <body>
     <div class="signup-container">
+    <img src="images/moneycraftnewlogo.png" alt="MoneyCraft Logo" style="width: 200px; margin-bottom: 1.5rem;">
         <h2>Create a New Account</h2>
         
         <?php

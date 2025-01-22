@@ -60,18 +60,21 @@ if ($action === 'save') {
     // Example filter logic
     $dateFilter = isset($_GET['date']) ? $_GET['date'] : null;
 
-    $sql = "SELECT TranID, TranTitle, TranType, TranAmount, TranDate FROM Transactions WHERE UserID = ?";
-    if ($dateFilter) {
-        $sql .= " AND DATE(TranDate) = ?";
-    }
-    $sql .= " ORDER BY TranDate DESC";
+    $sql = "SELECT TranID, TranTitle, TranType, TranAmount, TranDate 
+    FROM Transactions 
+    WHERE UserID = ?";
+if ($dateFilter) {
+$sql .= " AND DATE(TranDate) = ?";
+}
+$sql .= " ORDER BY TranDate DESC"; // Ensure latest transactions come first
 
-    $stmt = $conn->prepare($sql);
-    if ($dateFilter) {
-        $stmt->bind_param("is", $userId, $dateFilter);
-    } else {
-        $stmt->bind_param("i", $userId);
-    }
+$stmt = $conn->prepare($sql);
+if ($dateFilter) {
+$stmt->bind_param("is", $userId, $dateFilter);
+} else {
+$stmt->bind_param("i", $userId);
+}
+
     $stmt->execute();
     $result = $stmt->get_result();
 

@@ -197,17 +197,29 @@ $savingsGoals = $conn->query("SELECT * FROM Savings WHERE UserID = $user_id");
                 <div class="savings-goal">
                     <img src="<?php echo $row['SavingsPicture']; ?>" alt="<?php echo $row['SavingsTitle']; ?>" class="goal-image">
                     <div class="goal-details">
-                        <h2><?php echo $row['SavingsTitle']; ?></h2>
-                        <p>Balance Needed: RM<?php echo $row['SavingsAmt']; ?></p>
-                        <p>Total Savings: RM<?php echo $row['CurrentSavings'] ?? 0; ?></p>
-                        <div class="progress">
-                            <div class="progress-bar" role="progressbar" style="width 10px: <?php echo ($row['CurrentSavings'] / $row['SavingsAmt']) * 100; ?>%;">
-                                <?php echo round(($row['CurrentSavings'] / $row['SavingsAmt']) * 100, 2); ?>%
-                            </div>
-                        </div>
-                        <button onclick="editGoal(<?php echo $row['SavingsID']; ?>)" class="edit-button">Edit</button>
-                        <button onclick="deleteGoal(<?php echo $row['SavingsID']; ?>)" class="delete-button">Delete</button>
-                    </div>
+    <h2><?php echo $row['SavingsTitle']; ?></h2>
+    <p>Target: RM<?php echo $row['SavingsAmt']; ?></p>
+    <p>Saved: RM<?php echo $row['CurrentSavings'] ?? 0; ?></p>
+    <div class="progress">
+        <div class="progress-bar" role="progressbar" 
+             style="width: <?php echo ($row['CurrentSavings'] / $row['SavingsAmt']) * 100; ?>%;" 
+             aria-valuenow="<?php echo $row['CurrentSavings']; ?>" 
+             aria-valuemin="0" 
+             aria-valuemax="<?php echo $row['SavingsAmt']; ?>">
+            <?php echo round(($row['CurrentSavings'] / $row['SavingsAmt']) * 100, 2); ?>%
+        </div>
+    </div>
+    <!-- Update Progress Form -->
+    <form onsubmit="updateSavings(event, <?php echo $row['SavingsID']; ?>)">
+        <input type="number" step="0.01" min="0" name="amount" placeholder="Add to savings" required>
+        <button type="submit" class="edit-button">Update Progress</button>
+    </form>
+    <!-- Edit Button -->
+    <button onclick="editGoal(<?php echo $row['SavingsID']; ?>)" class="edit-button">Edit Goal</button>
+    <!-- Delete Button -->
+    <button onclick="deleteGoal(<?php echo $row['SavingsID']; ?>)" class="delete-button">Delete</button>
+</div>
+
                 </div>
             <?php endwhile; ?>
         </div>
@@ -239,63 +251,92 @@ $savingsGoals = $conn->query("SELECT * FROM Savings WHERE UserID = $user_id");
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const addGoalBtn = document.getElementById('add-goal-btn');
-            const goalModal = new bootstrap.Modal(document.getElementById('goal-modal'));
-            const goalForm = document.getElementById('goal-form');
+      document.addEventListener('DOMContentLoaded', () => {
+    const addGoalBtn = document.getElementById('add-goal-btn');
+    const goalModal = new bootstrap.Modal(document.getElementById('goal-modal'));
+    const goalForm = document.getElementById('goal-form');
 
-            addGoalBtn.onclick = () => {
-                goalForm.reset();
-                goalForm.querySelector('input[name="action"]').value = 'create';
-                goalModal.show();
-            };
+    // Open "Add New Goal" Modal
+    addGoalBtn.onclick = () => {
+        goalForm.reset();
+        goalForm.querySelector('input[name="action"]').value = 'create';
+        goalModal.show();
+    };
 
-            goalForm.onsubmit = async (e) => {
-                e.preventDefault();
-                const formData = new FormData(goalForm);
-                formData.append('user_id', <?php echo $user_id; ?>);
+    // Submit Goal Form (Create or Edit)
+    goalForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(goalForm);
+        formData.append('user_id', <?php echo $user_id; ?>);
 
-                const response = await fetch('savings_process.php', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
-                alert(data.success ? "Savings goal saved successfully!" : `Error: ${data.error}`);
-                if (data.success) {
-                    goalModal.hide();
-                    location.reload();
-                }
-            };
-
-            window.editGoal = (id) => {
-                fetch(`savings_process.php?action=fetch&id=${id}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data) {
-                            document.getElementById('savings_id').value = data.SavingsID;
-                            document.querySelector('input[name="SavingsTitle"]').value = data.SavingsTitle;
-                            document.querySelector('input[name="SavingsAmt"]').value = data.SavingsAmt;
-                            document.querySelector('input[name="TargetDate"]').value = data.TargetDate;
-                            goalForm.querySelector('input[name="action"]').value = 'edit';
-                            goalModal.show();
-                        }
-                    });
-            };
-
-            window.deleteGoal = (id) => {
-                if (confirm('Are you sure you want to delete this savings goal?')) {
-                    fetch(`savings_process.php?action=delete&id=${id}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            alert(data.success ? "Savings goal deleted successfully!" : `Error: ${data.error}`);
-                            if (data.success) {
-                                location.reload();
-                            }
-                        });
-                }
-            };
+        const response = await fetch('savings_process.php', {
+            method: 'POST',
+            body: formData
         });
+
+        const data = await response.json();
+        alert(data.success ? "Savings goal saved successfully!" : `Error: ${data.error}`);
+        if (data.success) {
+            goalModal.hide();
+            location.reload();
+        }
+    };
+
+    // Edit Goal Function
+    window.editGoal = async (id) => {
+        const response = await fetch(`savings_process.php?action=fetch&id=${id}`);
+        const data = await response.json();
+        if (data) {
+            document.getElementById('savings_id').value = data.SavingsID;
+            document.querySelector('input[name="SavingsTitle"]').value = data.SavingsTitle;
+            document.querySelector('input[name="SavingsAmt"]').value = data.SavingsAmt;
+            document.querySelector('input[name="TargetDate"]').value = data.TargetDate;
+            goalForm.querySelector('input[name="action"]').value = 'edit';
+            goalModal.show();
+        } else {
+            alert('Failed to fetch savings goal details.');
+        }
+    };
+
+    // Update Savings Progress
+    window.updateSavings = async (event, savingsId) => {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+        formData.append('action', 'update_progress');
+        formData.append('savings_id', savingsId);
+
+        const response = await fetch('savings_process.php', {
+            method: 'POST',
+            body: formData,
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            alert("Savings progress updated successfully!");
+            location.reload();
+        } else {
+            alert(`Error: ${data.error}`);
+        }
+    };
+
+    // Delete Goal Function
+    window.deleteGoal = async (id) => {
+        if (confirm('Are you sure you want to delete this savings goal?')) {
+            const response = await fetch(`savings_process.php?action=delete&id=${id}`);
+            const data = await response.json();
+            if (data.success) {
+                alert("Savings goal deleted successfully!");
+                location.reload();
+            } else {
+                alert(`Error: ${data.error}`);
+            }
+        }
+    };
+});
+
+
+
     </script>
 </body>
 </html>

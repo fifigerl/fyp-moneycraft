@@ -65,6 +65,8 @@ if ($action == 'create') {
 
     echo json_encode(['overdueCount' => $overdueCount]);
  
+    
+    
 
 
     if ($paid) {
@@ -93,6 +95,36 @@ if ($action == 'create') {
     }
 
     echo json_encode(['success' => 'Bill payment status updated successfully']);
+}
+
+
+elseif ($action == 'fetchNotifications') {
+    $userId = $_POST['user_id'];
+    $today = date('Y-m-d');
+    $tenDaysLater = date('Y-m-d', strtotime('+10 days'));
+
+    // Query to fetch overdue bills or bills due within the next 10 days
+    $stmt = $conn->prepare("
+        SELECT BillTitle, BillDue, DATEDIFF(BillDue, ?) AS DaysLeft 
+        FROM BillsReminder 
+        WHERE UserID = ? AND Paid = 0 AND (BillDue <= ? OR BillDue BETWEEN ? AND ?)
+        ORDER BY BillDue ASC
+    ");
+    $stmt->bind_param("sisss", $today, $userId, $today, $today, $tenDaysLater);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $notifications = [];
+    while ($row = $result->fetch_assoc()) {
+        $notifications[] = [
+            'title' => $row['BillTitle'],
+            'dueDate' => $row['BillDue'],
+            'daysLeft' => $row['DaysLeft']
+        ];
+    }
+
+    echo json_encode(['notifications' => $notifications]);
+    exit;
 }
 
 $conn->close();

@@ -113,6 +113,7 @@ logUserActivity($conn, $user_id, $username, "Viewed Budgets Page", "View");
             padding: 5px 10px;
             border: none;
             cursor: pointer;
+            margin-bottom: 10px;
         }
 
         .btn-delete {
@@ -198,6 +199,11 @@ logUserActivity($conn, $user_id, $username, "Viewed Budgets Page", "View");
         .modal-content .btn-close-custom:hover {
             background-color: #FDF09D;
         }
+
+        .progress-bar.exceeded {
+    background-color: red !important;
+}
+
     </style>
 </head>
 <body>
@@ -245,18 +251,18 @@ logUserActivity($conn, $user_id, $username, "Viewed Budgets Page", "View");
                         <input type="text" name="title" id="budget-title" placeholder="Budget Title" required>
                         <select name="category" id="budget-category" required>
                             <optgroup label="Expense">
-                                <option value="Tuition Fees">Tuition Fees</option>
-                                <option value="Rent">Rent</option>
-                                <option value="Utilities">Utilities</option>
-                                <option value="Groceries">Groceries</option>
-                                <option value="Dining Out">Dining Out</option>
-                                <option value="Transportation">Transportation</option>
-                                <option value="School Supplies">School Supplies</option>
-                                <option value="Technology">Technology</option>
-                                <option value="Health and Wellness">Health and Wellness</option>
-                                <option value="Entertainment">Entertainment</option>
-                                <option value="Shopping">Shopping</option>
-                                <option value="Other">Other</option>
+                                    <option value="Academic Expenses">Academic Expenses</option>
+                            <option value="Rent">Rent</option>
+                            <option value="Utilities">Utilities</option>
+                            <option value="Groceries">Groceries</option>
+                            <option value="Dining out">Dining Out</option>
+                            <option value="Transportation">Transportation</option>
+                            <option value="Personal Care">Personal Care</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Technology">Technology</option>
+                            <option value="Savings and Investments">Savings and Investments</option>
+                            <option value="Miscellaneous">Miscellaneous</option>
+                            <option value="Clothing">Clothing</option>
                             </optgroup>
                         </select>
                         <input type="number" name="amount" id="budget-amount" placeholder="Amount" required>
@@ -288,34 +294,46 @@ logUserActivity($conn, $user_id, $username, "Viewed Budgets Page", "View");
                     console.error("Error fetching budgets:", error);
                 }
             }
-
             function renderBudgets(budgets) {
-                budgetsList.innerHTML = ''; // Clear previous rows
+    budgetsList.innerHTML = ''; // Clear previous rows
 
-                budgets.forEach(budget => {
-                    const progressPercentage = budget.CurrentSavings && budget.BudgetAmt ? Math.min((budget.CurrentSavings / budget.BudgetAmt) * 100, 100).toFixed(2) : 0;
-                    const row = document.createElement('tr');
+    budgets.forEach(budget => {
+        const progressPercentage = budget.UtilizedAmount && budget.BudgetAmt
+            ? Math.min((budget.UtilizedAmount / budget.BudgetAmt) * 100, 100).toFixed(2)
+            : 0;
 
-                    row.innerHTML = `
-                        <td>${budget.BudgetTitle}</td>
-                        <td>${budget.BudgetCat}</td>
-                        <td>RM${parseFloat(budget.BudgetAmt).toFixed(2)}</td>
-                        <td>
-                            <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width: ${progressPercentage}%">${progressPercentage}%</div>
-                            </div>
-                        </td>
-                        <td>${budget.BudgetStart}</td>
-                        <td>${budget.BudgetEnd}</td>
-                        <td>
-                            <button class="btn-edit" onclick='editBudget(${JSON.stringify(budget)})'>Edit</button>
-                            <button class="btn-delete" onclick='deleteBudget(${budget.BudgetID})'>Delete</button>
-                        </td>
-                    `;
+        const notification = budget.Status === "Exceeded"
+            ? `<span style="color: red;">Budget exceeded by RM${(budget.UtilizedAmount - budget.BudgetAmt).toFixed(2)}</span>`
+            : `You can spend RM${budget.DailyLimit.toFixed(2)} per day until ${budget.BudgetEnd}.`;
 
-                    budgetsList.appendChild(row);
-                });
-            }
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+            <td>${budget.BudgetTitle}</td>
+            <td>${budget.BudgetCat}</td>
+            <td>RM${parseFloat(budget.BudgetAmt).toFixed(2)}</td>
+            <td>
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: ${progressPercentage}%">
+                        ${progressPercentage}%
+                    </div>
+                </div>
+                <small>RM${parseFloat(budget.UtilizedAmount).toFixed(2)} used</small>
+            </td>
+            <td>${budget.BudgetStart}</td>
+            <td>${budget.BudgetEnd}</td>
+            <td>${notification}</td>
+            <td>
+                <button class="btn-edit" onclick='editBudget(${JSON.stringify(budget)})'>Edit</button>
+                <button class="btn-delete" onclick='deleteBudget(${budget.BudgetID})'>Delete</button>
+            </td>
+        `;
+
+        budgetsList.appendChild(row);
+    });
+}
+
+
 
             addBudgetBtn.addEventListener('click', () => {
                 budgetForm.reset();
@@ -375,6 +393,14 @@ logUserActivity($conn, $user_id, $username, "Viewed Budgets Page", "View");
 
             fetchBudgets();
         });
+
+        const progressBarClass = budget.Status === "Exceeded" ? "exceeded" : "";
+row.innerHTML = `
+    <div class="progress-bar ${progressBarClass}" role="progressbar" style="width: ${progressPercentage}%">
+        ${progressPercentage}%
+    </div>
+`;
+
     </script>
 </body>
 </html>

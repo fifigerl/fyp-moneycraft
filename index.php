@@ -24,6 +24,8 @@ $result = $stmt->get_result();
 $users = $result->fetch_assoc();
 $username = $users['Username'] ?? 'User'; // Default to 'User' if username is not found
 
+
+
 // Fetch total income, expenses, and current balance
 $sql = "SELECT 
             SUM(CASE WHEN TranType = 'Income' THEN TranAmount ELSE 0 END) AS total_income,

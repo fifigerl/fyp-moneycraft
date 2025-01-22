@@ -33,10 +33,13 @@ include '../navbar.php';
     <title>My Bills</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
     <style>
         body {
             background-color: #F8F9FA;
             font-family: 'Inter', sans-serif;
+        
         }
 
         .bill-container {
@@ -53,6 +56,8 @@ include '../navbar.php';
             color: rgb(0, 35, 72);
             font-weight: 900;
             margin-bottom: 20px;
+            margin-left: 30px;
+            margin-top:20px;
         }
 
         #add-bill-btn {
@@ -64,11 +69,19 @@ include '../navbar.php';
             padding: 10px 20px;
             cursor: pointer;
             margin-bottom: 20px;
+            margin-left:20px;
         }
 
         #add-bill-btn:hover {
             background-color: #FDF09D;
         }
+        #bills-list {
+    padding: 20px; /* Add padding for spacing */
+    margin: 10px;  /* Optional: Add margin for separation */
+    background-color: #f9f9f9; /* Optional: Light background for contrast */
+    border-radius: 10px; /* Optional: Rounded corners */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Subtle shadow */
+}
 
         .bill-item {
             position: relative; /* Ensure elements can be positioned within the card */
@@ -78,6 +91,7 @@ include '../navbar.php';
             padding: 15px;
             margin-bottom: 15px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            
         }
         .bill-details h4 {
             font-weight: bold;
@@ -222,16 +236,50 @@ include '../navbar.php';
     display: block;
 }
 
-.overdue-notification {
-    background-color: #ffe6e6;
-    padding: 10px 20px;
-    margin-bottom: 20px;
-    border: 1px solid #ffcccc;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
+.notification-card-container {
+    background-color:rgb(255, 255, 255);
+    padding: 10px;
+    margin-bottom: 10pxpx;
+    border: none;
+    border-radius: 12px;
     font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    color: #333;
 }
+
+.notification-card {
+    display: flex;
+    align-items: flex-start;
+    border-bottom: 1px solid rgb(252, 215, 215);
+    padding: 10px 0;
+}
+
+.notification-card:last-child {
+    border-bottom: none;
+}
+
+.notification-icon {
+    margin-right: 15px;
+    font-size: 24px;
+    color:rgb(229, 19, 0); /* Red icon color */
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.notification-message {
+    margin: 0;
+    color: #555;
+    font-size: 14px;
+}
+
+
 
 </style>
 
@@ -239,8 +287,20 @@ include '../navbar.php';
     </style>
 </head>
 <body>
+
+
+<h1>My Bills</h1>
+
 <div class="bill-container">
-        <h1>My Bills</h1>
+   <div id="notifications" class="notification-card-container">
+    <p>No notifications yet.</p>
+</div>
+</div>
+
+
+        
+
+
         <button id="add-bill-btn">+ Add Bill</button>
         <div id="bills-list"></div>
     </div>
@@ -371,6 +431,42 @@ fetchOverdueCount();
         billsList.appendChild(billItem);
     });
 }
+
+async function fetchNotifications() {
+    const response = await fetch('bills_process.php', {
+        method: 'POST',
+        body: new URLSearchParams({
+            action: 'fetchNotifications',
+            user_id: <?php echo $user_id; ?>
+        })
+    });
+
+    const data = await response.json();
+    const notificationsDiv = document.getElementById('notifications');
+
+    if (data.notifications.length > 0) {
+        notificationsDiv.innerHTML = ''; // Clear existing notifications
+        data.notifications.forEach(notification => {
+            const isOverdue = notification.daysLeft < 0;
+            const message = isOverdue
+                ? `<span class="overdue">Overdue:</span> ${notification.title} (Due ${Math.abs(notification.daysLeft)} days ago)`
+                : `<span class="upcoming">Upcoming:</span> ${notification.title} (Due in ${notification.daysLeft} days)`;
+
+            const notificationItem = document.createElement('div');
+            notificationItem.className = 'notification-item';
+            notificationItem.innerHTML = `
+                <i class="fas fa-bell"></i>
+                <div class="notification-text">${message}</div>
+            `;
+            notificationsDiv.appendChild(notificationItem);
+        });
+    } else {
+        notificationsDiv.innerHTML = '<p>No notifications yet.</p>';
+    }
+}
+
+// Call this function on page load
+fetchNotifications();
 
 
 

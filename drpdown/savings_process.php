@@ -25,7 +25,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $response['success'] = true;
         } else {
             $response['error'] = 'Failed to update progress: ' . $conn->error;
+
         }
+
+        if ($action === 'update_progress' && $id) {
+            $amount = $_POST['amount'] ?? 0;
+        
+            // Update the savings goal progress
+            $sql = "UPDATE Savings SET CurrentSavings = CurrentSavings + $amount WHERE SavingsID = $id AND UserID = $userId";
+            if ($conn->query($sql) === TRUE) {
+                $response['success'] = true;
+            } else {
+                $response['error'] = 'Failed to update savings progress: ' . $conn->error;
+            }
+        }
+        
     } else {
         $title = $_POST['SavingsTitle'];
         $amount = $_POST['SavingsAmt'];

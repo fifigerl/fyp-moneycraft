@@ -74,18 +74,54 @@ margin-bottom: 10px;
     background-color: #f5f5f5;
 }
 
+/* Unified button styling */
+.btn {
+    display: inline-block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 8px 15px;
+    border-radius: 10px;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Primary button for actions like view or edit */
 .btn-primary {
     background-color: #FFD000;
     color: #161925;
     border: none;
-    padding: 10px 20px;
-    border-radius: 15px;
-    font-weight: bold;
 }
 
 .btn-primary:hover {
     background-color: #FDF09D;
+    color: #161925;
 }
+
+/* Danger button for delete or suspend actions */
+.btn-danger {
+    background-color: #ff4d4d;
+    color: #ffffff;
+    border: none;
+}
+
+.btn-danger:hover {
+    background-color: #ff6666;
+    color: #ffffff;
+}
+
+/* Success button for activate actions */
+.btn-success {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+}
+
+.btn-success:hover {
+    background-color: #45a049;
+}
+
 
 .admin-activity-logs {
     background-color: #FFFFFF;

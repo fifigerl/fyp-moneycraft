@@ -182,13 +182,14 @@ if ($activity_result) {
                     <td><?php echo htmlspecialchars($user['status']); ?></td>
                     <td><?php echo $transactions[$user['UserID']] ?? 0; ?></td>
                     <td>
-                        <button class="btn-primary" onclick="viewUser(<?php echo $user['UserID']; ?>)">View</button>
-                        <?php if ($user['status'] === 'active'): ?>
-                            <button class="btn-primary" onclick="toggleUserStatus(<?php echo $user['UserID']; ?>, 'suspend')">Suspend</button>
-                        <?php else: ?>
-                            <button class="btn-primary" onclick="toggleUserStatus(<?php echo $user['UserID']; ?>, 'activate')">Activate</button>
-                        <?php endif; ?>
-                    </td>
+    <a href="view_user_details.php?user_id=<?php echo $user['UserID']; ?>" class="btn btn-primary">View</a>
+    <?php if ($user['status'] === 'active'): ?>
+        <button class="btn btn-danger" onclick="toggleUserStatus(<?php echo $user['UserID']; ?>, 'suspend')">Suspend</button>
+    <?php else: ?>
+        <button class="btn btn-success" onclick="toggleUserStatus(<?php echo $user['UserID']; ?>, 'activate')">Activate</button>
+    <?php endif; ?>
+</td>
+
                 </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -209,15 +210,31 @@ if ($activity_result) {
     </div>
 
     <script>
-        function viewUser(userId) {
-            alert('Viewing user details for ID: ' + userId);
-        }
+    function viewUser(userId) {
+    window.location.href = `view_user_details.php?user_id=${userId}`;
+}
 
-        function toggleUserStatus(userId, action) {
-            if (confirm(`Are you sure you want to ${action} this user?`)) {
-                // AJAX call logic here
+function toggleUserStatus(userId, action) {
+    if (confirm(`Are you sure you want to ${action} this user?`)) {
+        fetch('update_user_status.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `user_id=${userId}&action=${action}`,
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`User has been ${action === 'activate' ? 'activated' : 'suspended'} successfully.`);
+                location.reload();
+            } else {
+                alert(`Error: ${data.error}`);
             }
-        }
+        });
+    }
+}
+
     </script>
 </body>
 
@@ -231,25 +248,27 @@ if ($activity_result) {
         }
 
         function toggleUserStatus(userId, action) {
-            if (confirm(`Are you sure you want to ${action} this user?`)) {
-                fetch('update_user_status.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `user_id=${userId}&action=${action}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(`User has been ${action}ed successfully.`);
-                        location.reload();
-                    } else {
-                        alert(`Error: ${data.error}`);
-                    }
-                });
+    if (confirm(`Are you sure you want to ${action} this user?`)) {
+        fetch('update_user_status.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `user_id=${userId}&action=${action}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert(`Error: ${data.error}`);
             }
-        }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+}
+
 
         function searchUsers() {
             const input = document.getElementById('userSearch');

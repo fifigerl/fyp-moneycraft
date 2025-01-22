@@ -44,9 +44,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bind_param("i", $userId);
     $stmt->execute();
     $result = $stmt->get_result();
-    $budgets = $result->fetch_all(MYSQLI_ASSOC);
+    $budgets = [];
+
+    while ($budget = $result->fetch_assoc()) {
+        // Calculate utilized amount for this budget
+        $utilization_sql = "
+            SELECT SUM(TranAmount) AS UtilizedAmount
+            FROM Transactions
+            WHERE UserID = ? AND TranCat = ? AND TranDate BETWEEN ? AND ?";
+        $util_stmt = $conn->prepare($utilization_sql);
+        $util_stmt->bind_param(
+            "isss",
+            $userId,
+            $budget['BudgetCat'],
+            $budget['BudgetStart'],
+            $budget['BudgetEnd']
+        );
+        $util_stmt->execute();
+        $util_result = $util_stmt->get_result()->fetch_assoc();
+        $utilized_amount = $util_result['UtilizedAmount'] ?? 0;
+
+        // Calculate remaining budget and days
+        $remaining_budget = max($budget['BudgetAmt'] - $utilized_amount, 0);
+        $current_date = new DateTime();
+        $end_date = new DateTime($budget['BudgetEnd']);
+        $days_remaining = max($end_date->diff($current_date)->days, 0);
+
+        // Calculate daily spending limit
+        $daily_limit = $days_remaining > 0 ? ($remaining_budget / $days_remaining) : 0;
+
+        // Determine budget status
+        $status = $remaining_budget <= 0 ? "Exceeded" : "Within Budget";
+
+        // Add details to the budget
+        $budget['UtilizedAmount'] = $utilized_amount;
+        $budget['RemainingBudget'] = $remaining_budget;
+        $budget['DaysRemaining'] = $days_remaining;
+        $budget['DailyLimit'] = $daily_limit;
+        $budget['Status'] = $status;
+
+        $budgets[] = $budget;
+
+        $util_stmt->close();
+    }
+
     echo json_encode($budgets);
     $stmt->close();
     exit();
 }
+
 ?>

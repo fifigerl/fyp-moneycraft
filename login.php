@@ -32,58 +32,72 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $password = trim($_POST["password"]);
     }
 
-    // Validate credentials
-    if (empty($username_err) && empty($password_err)) {
-        // Prepare a select statement
-        $sql = "SELECT UserID, Username, UserPwd, status FROM users WHERE Username = ?";
+  // Validate credentials
+if (empty($username_err) && empty($password_err)) {
+    $sql = "SELECT UserID, Username, UserPwd, status FROM Users WHERE Username = ?";
+    if ($stmt = $conn->prepare($sql)) {
+        $stmt->bind_param("s", $param_username);
+        $param_username = $username;
 
-        if ($stmt = $conn->prepare($sql)) {
-            // Bind variables to the prepared statement as parameters
-            $stmt->bind_param("s", $param_username);
-            
-            // Set parameters
-            $param_username = $username;
-            
-            // Attempt to execute the prepared statement
-            if ($stmt->execute()) {
-                // Store result
-                $stmt->store_result();
-                
-                // Check if username exists, if yes then verify password
-                if ($stmt->num_rows == 1) {
-                    // Bind result variables
-                    $stmt->bind_result($id, $username, $hashed_password, $status);
-                    if ($stmt->fetch()) {
-                        if ($status === 'inactive') {
-                            $login_err = "Your account has been suspended. Please contact support.";
-                        } elseif (password_verify($password, $hashed_password)) {
-                            // Password is correct, so start a new session
-                            session_start();
-                            
-                            // Store data in session variables
-                            $_SESSION["loggedin"] = true;
-                            $_SESSION["id"] = $id;
-                            $_SESSION["username"] = $username;                            
-                            
-                            // Redirect user to index page
-                            header("location: index.php");
-                        } else {
-                            // Password is not valid, display a generic error message
-                            $login_err = "Invalid username or password.";
-                        }
+        if ($stmt->execute()) {
+            $stmt->store_result();
+
+            if ($stmt->num_rows == 1) {
+                $stmt->bind_result($id, $username, $hashed_password, $status);
+                if ($stmt->fetch()) {
+                    if ($status === 'suspended') {
+                        // Redirect suspended user to suspension page
+                        header("location: user_suspended.php");
+                        exit;
+                    } elseif (password_verify($password, $hashed_password)) {
+                        // Password is correct, start session
+                        session_start();
+                        $_SESSION["loggedin"] = true;
+                        $_SESSION["id"] = $id;
+                        $_SESSION["username"] = $username;
+                        $_SESSION["status"] = $status;
+
+                        // Redirect to index page
+                        header("location: index.php");
+                    } else {
+                        $login_err = "Invalid username or password.";
                     }
-                } else {
-                    // Username doesn't exist, display a generic error message
-                    $login_err = "Invalid username or password.";
                 }
             } else {
-                echo "Oops! Something went wrong. Please try again later.";
+                $login_err = "Invalid username or password.";
             }
+        } else {
+            echo "Oops! Something went wrong. Please try again later.";
+        }
+        $stmt->close();
+    }
+}
+$conn->close();
+        
+    
 
-            // Close statement
-            $stmt->close();
+    if ($stmt->fetch()) {
+        if ($status === 'suspended') {
+            // Redirect suspended user to suspension page
+            header("location: user_suspended.php");
+            exit;
+        } elseif (password_verify($password, $hashed_password)) {
+            // Password is correct, so start a new session
+            session_start();
+            
+            // Store data in session variables
+            $_SESSION["loggedin"] = true;
+            $_SESSION["id"] = $id;
+            $_SESSION["username"] = $username;                            
+    
+            // Redirect user to index page
+            header("location: index.php");
+        } else {
+            // Password is not valid, display a generic error message
+            $login_err = "Invalid username or password.";
         }
     }
+    
 
     // Close connection
     $conn->close();
@@ -277,6 +291,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </style>
 </head>
 <body>
+
+
+
     <!-- Illustration Section -->
     <div class="illustration-container">
         <h1>Welcome to MoneyCraft</h1>
@@ -293,6 +310,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <!-- Login Form Section -->
     <div class="login-container">
         <h2>Login to Your Account</h2>
+        <?php if (!empty($logout_message)): ?>
+    <div class="logout-message" style="background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 15px; border: 1px solid #c3e6cb; border-radius: 5px;">
+        <?php echo $logout_message; ?>
+    </div>
+<?php endif; ?>
+
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
             <div class="input-group">
                 <label for="username">Username</label>

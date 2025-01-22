@@ -59,7 +59,7 @@ include '../navbar.php';
     <meta charset="UTF-8">
     <title>My Transactions - MoneyCraft</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.1/dist/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@6.0.0/dist/tesseract.min.js"></script>
 
     <!-- Inline Styles -->
     <style>
@@ -465,14 +465,33 @@ include '../navbar.php';
             </select>
             <select name="category" id="tran_category" required>
                 <optgroup label="Expense">
-                    <option value="Tuition Fees">Tuition Fees</option>
+                    <option value="Academic Expenses">Academic Expenses</option>
                     <option value="Rent">Rent</option>
                     <option value="Utilities">Utilities</option>
+                    <option value="Groceries">Groceries</option>
+                    <option value="Dining out">Dining Out</option>
+                    <option value="Transportation">Transportation</option>
+                    <option value="Personal Care">Personal Care</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Technology">Technology</option>
+                    <option value="Savings and Investments">Savings and Investments</option>
+                    <option value="Miscellaneous">Miscellaneous</option>
+                    <option value="Clothing">Clothing</option>
+
+
                     <!-- Other options -->
                 </optgroup>
                 <optgroup label="Income">
                     <option value="Allowance">Allowance</option>
                     <option value="Part-time Job">Part-time Job</option>
+                    <option value="Passive Income">Passive Income</option>
+                    <option value="Scholarships and Grants">Scholarships and Grants</option>
+                    <option value="Student Loans">Student Loans</option>
+                    <option value="Internships">Internships</option>
+                    <option value="Freelancing">Freelancing</option>
+                    <option value="Content Cretion">Content Creation</option>
+                    <option value="Small Business">Small Business</option>
+                    <option value="Miscellaneous Income">Miscellaneous Income</option>
                     <!-- Other options -->
                 </optgroup>
             </select>
@@ -482,14 +501,17 @@ include '../navbar.php';
         </form>
     </div>
 
-    <div id="scan-receipt-modal" class="tran-modal">
+   <div id="scan-receipt-modal" class="tran-modal">
     <span class="close">&times;</span>
-    <div style="text-align: center;">
+    <div style="position: relative; text-align: center;">
         <video id="camera-stream" autoplay playsinline style="width: 100%; border-radius: 15px;"></video>
         <canvas id="receipt-canvas" style="display: none;"></canvas>
+        <!-- Overlay -->
+        <div id="camera-overlay"></div>
         <button id="capture-receipt" class="tran-add-button" style="margin-top: 10px;">Capture Receipt</button>
     </div>
 </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
@@ -564,7 +586,7 @@ include '../navbar.php';
             let submitted = false;
 
             async function fetchTransactions(dateFilter = null) {
-         try {
+    try {
         const url = dateFilter 
             ? `tran_process.php?date=${encodeURIComponent(dateFilter)}` 
             : 'tran_process.php';
@@ -573,10 +595,11 @@ include '../navbar.php';
         const data = await response.json();
         renderTransactions(data);
         calculateBalances(data);
-             } catch (error) {
+    } catch (error) {
         console.error("Error fetching transactions:", error);
     }
 }
+
 
 
             function renderTransactions(transactions) {
@@ -701,6 +724,7 @@ if (tran.TranType === 'Income') {
     const selectedDate = event.target.value;
     fetchTransactions(selectedDate); // Fetch filtered transactions
 });
+
 
 
                         // Log the action of adding a transaction
@@ -896,7 +920,7 @@ croppedCanvas.getContext('2d').drawImage(resizedCanvas, 0, roiY, resizedCanvas.w
                 Tesseract.recognize(croppedCanvas.toDataURL(), 'eng', {
     tessedit_char_whitelist: '0123456789.$', // Focus on numbers and currency symbols
     preserve_interword_spaces: '1', // Retain spaces between words for better matching
-    psm: 6, // Assume a uniform block of text
+    psm: 11, // Assume a uniform block of text
 })
 .then(({ data: { text } }) => {
 
@@ -939,7 +963,7 @@ croppedCanvas.getContext('2d').drawImage(resizedCanvas, 0, roiY, resizedCanvas.w
     Tesseract.recognize(retryCanvas.toDataURL(), 'eng', {
         tessedit_char_whitelist: '0123456789.$',
         preserve_interword_spaces: '1',
-        psm: 6,
+        psm: 11,
     })
     .then(({ data: { text: retryText } }) => {
         console.log('Retry OCR Output:', retryText); // Log retry OCR result
@@ -974,14 +998,33 @@ croppedCanvas.getContext('2d').drawImage(resizedCanvas, 0, roiY, resizedCanvas.w
 
         // Open modal and start camera
         scanReceiptBtn.addEventListener('click', async () => {
+    try {
+        // Request access to the back camera
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { exact: "environment" } } // Use back camera
+        });
+        video.srcObject = stream;
+        scanReceiptModal.style.display = 'block';
+    } catch (error) {
+        console.error("Error accessing camera:", error);
+
+        // Fallback to default camera if back camera is unavailable
+        if (error.name === "OverconstrainedError" || error.name === "NotAllowedError") {
+            alert("Back camera not available. Using default camera instead.");
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: true // Default camera
+                });
                 video.srcObject = stream;
                 scanReceiptModal.style.display = 'block';
-            } catch (error) {
-                alert('Camera access denied or unavailable.');
+            } catch (fallbackError) {
+                alert(`Error accessing camera: ${fallbackError.message}`);
             }
-        });
+        } else {
+            alert(`Error: ${error.message}`);
+        }
+    }
+});
 
         // Close modal
         document.querySelector('.close').addEventListener('click', () => {
