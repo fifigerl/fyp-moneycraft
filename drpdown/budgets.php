@@ -204,6 +204,52 @@ logUserActivity($conn, $user_id, $username, "Viewed Budgets Page", "View");
     background-color: red !important;
 }
 
+@media (max-width: 768px) {
+    .table thead {
+        display: none; /* Hide table headers on small screens */
+    }
+    .table tr {
+        display: block; /* Stack rows vertically */
+        margin-bottom: 15px;
+        border-bottom: 1px solid #ddd;
+    }
+    .table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        border: none;
+    }
+    .table td::before {
+        content: attr(data-label); /* Use `data-label` for context */
+        font-weight: bold;
+        color: #555;
+    }
+}
+
+@media (max-width: 768px) {
+    .add-budget-btn {
+        width: 100%; /* Full-width button for smaller screens */
+        margin-bottom: 15px;
+    }
+    .btn-edit, .btn-delete {
+        font-size: 14px; /* Adjust button size */
+        padding: 5px 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .modal-dialog {
+        max-width: 90%; /* Reduce modal width for smaller screens */
+        margin: 10px auto;
+    }
+    .modal-content input, 
+    .modal-content select, 
+    .modal-content button {
+        font-size: 14px; /* Adjust input sizes */
+    }
+}
+
+
     </style>
 </head>
 <body>

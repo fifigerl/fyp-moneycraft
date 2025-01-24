@@ -32,74 +32,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $password = trim($_POST["password"]);
     }
 
-  // Validate credentials
-if (empty($username_err) && empty($password_err)) {
-    $sql = "SELECT UserID, Username, UserPwd, status FROM Users WHERE Username = ?";
-    if ($stmt = $conn->prepare($sql)) {
-        $stmt->bind_param("s", $param_username);
-        $param_username = $username;
+    // Validate credentials
+    if (empty($username_err) && empty($password_err)) {
+        $sql = "SELECT UserID, Username, UserPwd, status FROM Users WHERE Username = ?";
+        if ($stmt = $conn->prepare($sql)) {
+            $stmt->bind_param("s", $param_username);
+            $param_username = $username;
 
-        if ($stmt->execute()) {
-            $stmt->store_result();
+            if ($stmt->execute()) {
+                $stmt->store_result();
 
-            if ($stmt->num_rows == 1) {
-                $stmt->bind_result($id, $username, $hashed_password, $status);
-                if ($stmt->fetch()) {
-                    if ($status === 'suspended') {
-                        // Redirect suspended user to suspension page
-                        header("location: user_suspended.php");
-                        exit;
-                    } elseif (password_verify($password, $hashed_password)) {
-                        // Password is correct, start session
-                        session_start();
-                        $_SESSION["loggedin"] = true;
-                        $_SESSION["id"] = $id;
-                        $_SESSION["username"] = $username;
-                        $_SESSION["status"] = $status;
+                if ($stmt->num_rows == 1) {
+                    $stmt->bind_result($id, $username, $hashed_password, $status);
+                    if ($stmt->fetch()) {
+                        if ($status === 'suspended') {
+                            // Redirect suspended user to suspension page
+                            header("location: user_suspended.php");
+                            exit;
+                        } elseif (password_verify($password, $hashed_password)) {
+                            // Password is correct, start session
+                            session_start();
+                            $_SESSION["loggedin"] = true;
+                            $_SESSION["id"] = $id;
+                            $_SESSION["username"] = $username;
+                            $_SESSION["status"] = $status;
 
-                        // Redirect to index page
-                        header("location: index.php");
-                    } else {
-                        $login_err = "Invalid username or password.";
+                            // Redirect to index page
+                            header("location: index.php");
+                            exit;
+                        } else {
+                            $login_err = "Invalid username or password.";
+                        }
                     }
+                } else {
+                    $login_err = "Invalid username or password.";
                 }
             } else {
-                $login_err = "Invalid username or password.";
+                echo "Oops! Something went wrong. Please try again later.";
             }
-        } else {
-            echo "Oops! Something went wrong. Please try again later.";
-        }
-        $stmt->close();
-    }
-}
-$conn->close();
-        
-    
-
-    if ($stmt->fetch()) {
-        if ($status === 'suspended') {
-            // Redirect suspended user to suspension page
-            header("location: user_suspended.php");
-            exit;
-        } elseif (password_verify($password, $hashed_password)) {
-            // Password is correct, so start a new session
-            session_start();
-            
-            // Store data in session variables
-            $_SESSION["loggedin"] = true;
-            $_SESSION["id"] = $id;
-            $_SESSION["username"] = $username;                            
-    
-            // Redirect user to index page
-            header("location: index.php");
-        } else {
-            // Password is not valid, display a generic error message
-            $login_err = "Invalid username or password.";
+            $stmt->close();
         }
     }
-    
-
-    // Close connection
     $conn->close();
 }
 ?>
@@ -122,8 +95,7 @@ $conn->close();
 
         body {
             font-family: 'Nunito', sans-serif;
-            background: linear-gradient(to bottom,rgb(252, 249, 235),rgb(255, 255, 235), hsl(0, 0.00%, 99.60%));
-
+            background: linear-gradient(to bottom, rgb(252, 249, 235), rgb(255, 255, 235), hsl(0, 0.00%, 99.60%));
             display: flex;
             justify-content: center;
             align-items: center;
@@ -131,7 +103,6 @@ $conn->close();
             overflow: hidden;
         }
 
-        /* Animation keyframes */
         @keyframes fadeInUp {
             0% {
                 opacity: 0;
@@ -150,10 +121,6 @@ $conn->close();
 
         .illustration-container {
             width: 45%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
             text-align: center;
             padding: 1rem;
             margin-right: 10px;
@@ -164,13 +131,6 @@ $conn->close();
             color: #00296b;
             font-weight: 900;
             margin-bottom: 1rem;
-        }
-
-        .illustration-container p {
-            font-size: 1.2rem;
-            color: #555;
-            
-            line-height: 1.5;
         }
 
         .illustration-container dotlottie-player {
@@ -208,42 +168,20 @@ $conn->close();
             width: 100%;
             padding: 0.75rem;
             margin-top: 0.5rem;
-            border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 1rem;
-            border: none;
-        }
-
-        .options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .options a {
-            text-decoration: none;
-            color: #666;
-        }
-
-        .options a:hover {
-            text-decoration: underline;
         }
 
         .login-btn {
             width: 100%;
             background-color: #ffdd00;
             color: #fff;
-            border: none;
             padding: 0.75rem 0;
             font-size: 1rem;
             font-weight: bold;
             border-radius: 5px;
             cursor: pointer;
-            margin-bottom: 1rem;
-            transition: background-color 0.3s ease-in-out;
+            border: none;
         }
 
         .login-btn:hover {
@@ -251,49 +189,41 @@ $conn->close();
         }
 
         .social-login {
-            text-align: center;
-            margin: 1rem 0;
-            font-size: 0.9rem;
-            color: #333;
-        }
+    text-align: center;
+    margin-top: 1rem;
+}
 
-        .social-login-buttons {
-            display: flex;
-            justify-content: space-evenly;
-            margin-top: 1rem;
-        }
+.social-login-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
 
-        .social-login-buttons a {
-            font-size: 1.5rem;
-            color: #666;
-            text-decoration: none;
-        }
+.social-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
 
-        .social-login-buttons a:hover {
-            color: #333;
-        }
+.social-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
 
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-                padding: 1rem;
-            }
+.social-btn i {
+    color: inherit;
+}
 
-            .illustration-container {
-                width: 100%;
-                padding: 1rem;
-            }
-
-            .login-container {
-                width: 90%;
-            }
-        }
     </style>
 </head>
 <body>
-
-
-
     <!-- Illustration Section -->
     <div class="illustration-container">
         <h1>Welcome to MoneyCraft</h1>
@@ -310,11 +240,18 @@ $conn->close();
     <!-- Login Form Section -->
     <div class="login-container">
         <h2>Login to Your Account</h2>
+
         <?php if (!empty($logout_message)): ?>
-    <div class="logout-message" style="background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 15px; border: 1px solid #c3e6cb; border-radius: 5px;">
-        <?php echo $logout_message; ?>
-    </div>
-<?php endif; ?>
+        <div class="logout-message" style="background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 15px; border: 1px solid #c3e6cb; border-radius: 5px;">
+            <?php echo $logout_message; ?>
+        </div>
+        <?php endif; ?>
+
+        <?php if (!empty($login_err)): ?>
+        <div class="error-message" style="background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 15px; border: 1px solid #f5c6cb; border-radius: 5px;">
+            <?php echo $login_err; ?>
+        </div>
+        <?php endif; ?>
 
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
             <div class="input-group">
@@ -325,22 +262,27 @@ $conn->close();
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" placeholder="Enter your password" required>
             </div>
-            <div class="options">
-                <label><input type="checkbox" name="remember"> Remember Password</label>
-                <a href="#">Forgot Password?</a>
-            </div>
             <button type="submit" class="login-btn">Login</button>
         </form>
+   
         <div class="social-login">
-            Or Login With:
-            <div class="social-login-buttons">
-                <a href="#"><i class="fab fa-apple"></i></a>
-                <a href="#"><i class="fab fa-twitter"></i></a>
-                <a href="#"><i class="fab fa-facebook-f"></i></a>
-                <a href="#"><i class="fab fa-google"></i></a>
-            </div>
-        </div>
-        <p style="text-align: center; margin-top: 1rem;">No account yet? <a href="signup.php">Register</a></p>
+    <p style="text-align: center; font-weight: bold; font-size: 1rem; color: #333; margin-bottom: 1rem;">Or Login With:</p>
+    <div class="social-login-buttons">
+        <a href="#" class="social-btn" style="background-color: #333; color: #fff;">
+            <i class="fab fa-apple"></i>
+        </a>
+        <a href="#" class="social-btn" style="background-color: #1DA1F2; color: #fff;">
+            <i class="fab fa-twitter"></i>
+        </a>
+        <a href="#" class="social-btn" style="background-color: #1877F2; color: #fff;">
+            <i class="fab fa-facebook-f"></i>
+        </a>
+        <a href="#" class="social-btn" style="background-color: #DB4437; color: #fff;">
+            <i class="fab fa-google"></i>
+        </a>
     </div>
+    <p style="text-align: center; margin-top: 1rem;">No account yet? <a href="signup.php" style="color: #ffdd00; text-decoration: none;">Register</a></p>
+</div>
+
 </body>
 </html>

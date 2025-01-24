@@ -52,12 +52,15 @@ include '../navbar.php';
         }
 
         h1 {
-            font-size: 36px;
-            color: rgb(0, 35, 72);
             font-weight: 900;
-            margin-bottom: 20px;
-            margin-left: 30px;
-            margin-top:20px;
+    font-size: 48px; /* Increase the font size */
+    letter-spacing: 2px; /* Add letter spacing for a wider appearance */
+    color: rgb(0, 35, 72); /* Retain the existing color */
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left:20px;
+    text-align: left; /* Optional: Center-align the text */
+    padding: 20px;
         }
 
         #add-bill-btn {

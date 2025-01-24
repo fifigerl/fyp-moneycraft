@@ -329,6 +329,40 @@ function getYouTubeID($url) {
 }
 
     
+/* Default styles for larger screens (desktop view) */
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.card {
+    width: 30%; /* Adjust width for desktop view */
+    box-sizing: border-box;
+    padding: 20px;
+   
+    border-radius: 20px;
+}
+
+/* Responsive styles for mobile screens */
+@media screen and (max-width: 768px) {
+    .card-container {
+        display: block; /* Stack the cards on top of each other on mobile */
+    }
+
+    .card {
+        width: 100%; /* Cards will take up full width on mobile */
+        margin-bottom: 20px; /* Add some space between the cards */
+    }
+}
+
+/* Optional: Styles for smaller mobile screens */
+@media screen and (max-width: 480px) {
+    .card {
+        padding: 10px; /* Adjust padding for smaller mobile screens */
+    }
+}
 
 
 </style>
@@ -435,6 +469,8 @@ function getYouTubeID($url) {
             </div>
         </div>
 
+        
+
        <!-- Resource Materials Section -->
        <div class="resources" id="resources-section" style="display: none;">
     <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -443,7 +479,7 @@ function getYouTubeID($url) {
             Available Financial Resources
         </h2>
  <!-- Search Bar -->
- <div style="margin-left: auto; position: relative; width: 300px;">
+ <div style="margin-left: auto; position: relative; width: 300px; margin-bottom: 20px;">
             <input
                 type="text"
                 id="searchInput"
@@ -520,6 +556,22 @@ function getYouTubeID($url) {
     document.querySelectorAll('.card').forEach((card, index) => {
         card.style.animationDelay = `${index * 0.2}s`;
     });
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', function() {
+    const cardContainer = document.querySelector('.card-container');
+    const cards = Array.from(cardContainer.children); // Convert node list to array
+    
+    // Shuffle the array using Fisher-Yates algorithm
+    for (let i = cards.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [cards[i], cards[j]] = [cards[j], cards[i]]; // Swap elements
+    }
+    
+    // Append the shuffled cards back to the container
+    cardContainer.innerHTML = '';
+    cards.forEach(card => cardContainer.appendChild(card));
+  });
 </script>
 
 </body>

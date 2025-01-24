@@ -1,7 +1,7 @@
 <?php
 session_start();
 include '../config.php';
-include '../navbar.php'; 
+
 
 // Include the logging function
 function logUserActivity($conn, $userId, $username, $action, $type = null) {
@@ -189,6 +189,7 @@ $savingsGoals = $conn->query("SELECT * FROM Savings WHERE UserID = $user_id");
     </style>
 </head>
 <body>
+<?php include '../navbar.php'; ?>
     <div class="container">
         <h1>My Savings Goals</h1>
         <button id="add-goal-btn" class="add-button">+ Add Savings Goal</button>

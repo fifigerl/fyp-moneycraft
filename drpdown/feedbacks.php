@@ -74,6 +74,7 @@ $resources = $conn->query($sql_resources);
     margin-bottom: 20px;
     margin-left:20px;
     text-align: left; /* Optional: Center-align the text */
+    padding: 20px;
 }
 
         .feedbacks-container {
